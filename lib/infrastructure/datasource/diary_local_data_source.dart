@@ -106,7 +106,7 @@ final class DiaryLocalDataSource {
             '${year.toString().padLeft(4, '0')}-${month.toString().padLeft(2, '0')}';
         return db.query(
             _tableName,
-            where: "date LIKE ?",
+            where: 'date LIKE ?',
             whereArgs: ['$prefix-%'],
             orderBy: 'date ASC',
         );

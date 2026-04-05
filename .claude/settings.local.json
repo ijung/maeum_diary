@@ -3,7 +3,8 @@
     "allow": [
       "Bash(flutter pub:*)",
       "Bash(flutter test:*)",
-      "Bash(flutter analyze:*)"
+      "Bash(flutter analyze:*)",
+      "Skill(update-config)"
     ]
   }
 }

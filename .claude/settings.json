@@ -1,0 +1,16 @@
+{
+    "hooks": {
+        "PostToolUse": [
+            {
+                "matcher": "Edit|Write",
+                "hooks": [
+                    {
+                        "type": "command",
+                        "command": "jq -r '.tool_input.file_path' | grep -q '/Users/june.dev/Codes/github.com/ijung/maeum_diary/' && flutter analyze 2>&1 || true",
+                        "statusMessage": "flutter analyze 실행 중..."
+                    }
+                ]
+            }
+        ]
+    }
+}

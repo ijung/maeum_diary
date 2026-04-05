@@ -87,14 +87,14 @@ class _DiaryEditScreenState extends ConsumerState<DiaryEditScreen> {
                 child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                        _SectionLabel(label: '오늘의 감정 (최대 3개)'),
+                        const _SectionLabel(label: '오늘의 감정 (최대 3개)'),
                         const SizedBox(height: 12),
                         _EmotionPicker(
                             selected: _selectedEmotions,
                             onToggle: _toggleEmotion,
                         ),
                         const SizedBox(height: 32),
-                        _SectionLabel(label: '메모 (선택)'),
+                        const _SectionLabel(label: '메모 (선택)'),
                         const SizedBox(height: 12),
                         _MemoField(
                             controller: _memoController,
