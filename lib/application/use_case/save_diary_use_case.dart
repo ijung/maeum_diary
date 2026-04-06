@@ -1,7 +1,7 @@
 import 'package:maeum_diary/core/error/failures.dart';
 import 'package:maeum_diary/core/utils/date_utils.dart';
 import 'package:maeum_diary/domain/entity/diary_entry.dart';
-import 'package:maeum_diary/domain/repository/diary_repository.dart';
+import 'package:maeum_diary/domain/port/diary_repository.dart';
 import 'package:maeum_diary/domain/value_object/emotions_selection.dart';
 import 'package:uuid/uuid.dart';
 

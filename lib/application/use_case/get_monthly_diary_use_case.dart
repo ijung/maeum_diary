@@ -1,5 +1,5 @@
 import 'package:maeum_diary/domain/entity/diary_entry.dart';
-import 'package:maeum_diary/domain/repository/diary_repository.dart';
+import 'package:maeum_diary/domain/port/diary_repository.dart';
 
 /// 월별 일기 목록을 조회하는 UseCase (캘린더용)
 final class GetMonthlyDiaryUseCase {

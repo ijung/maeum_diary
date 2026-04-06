@@ -2,7 +2,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:maeum_diary/application/use_case/get_diary_by_date_use_case.dart';
 import 'package:maeum_diary/domain/entity/diary_entry.dart';
-import 'package:maeum_diary/domain/repository/diary_repository.dart';
+import 'package:maeum_diary/domain/port/diary_repository.dart';
 import 'package:maeum_diary/domain/value_object/emotion.dart';
 import 'package:maeum_diary/domain/value_object/emotions_selection.dart';
 

@@ -1,10 +1,11 @@
+import 'package:maeum_diary/infrastructure/port/diary_data_source_port.dart';
 import 'package:path/path.dart';
 import 'package:sqflite/sqflite.dart';
 
-/// SQLite 데이터베이스 초기화 및 CRUD를 담당하는 데이터 소스
+/// [DiaryDataSourcePort]의 SQLite 어댑터 구현체
 ///
 /// 싱글턴 패턴으로 앱 전체에서 단일 DB 인스턴스를 공유한다.
-final class DiaryLocalDataSource {
+final class DiaryLocalDataSource implements DiaryDataSourcePort {
     static const String _dbName = 'maeum_diary.db';
     // v2: 개발 초기 잘못된 타입으로 저장된 데이터 초기화
     static const int _dbVersion = 2;
@@ -64,6 +65,7 @@ final class DiaryLocalDataSource {
     // ─── CRUD ────────────────────────────────────────────────────────────────
 
     /// 일기를 삽입한다.
+    @override
     Future<void> insert(Map<String, dynamic> map) async {
         final db = await database;
         await db.insert(
@@ -74,6 +76,7 @@ final class DiaryLocalDataSource {
     }
 
     /// 기존 일기를 수정한다.
+    @override
     Future<void> update(Map<String, dynamic> map) async {
         final db = await database;
         await db.update(
@@ -85,6 +88,7 @@ final class DiaryLocalDataSource {
     }
 
     /// 'yyyy-MM-dd' 형식의 [date]에 해당하는 일기를 조회한다.
+    @override
     Future<Map<String, dynamic>?> queryByDate(String date) async {
         final db = await database;
         final rows = await db.query(
@@ -97,6 +101,7 @@ final class DiaryLocalDataSource {
     }
 
     /// [year]년 [month]월의 모든 일기를 조회한다.
+    @override
     Future<List<Map<String, dynamic>>> queryByMonth(
         int year,
         int month,
