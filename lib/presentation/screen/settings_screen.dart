@@ -115,20 +115,21 @@ class _ThemeTile extends ConsumerWidget {
 
         return Padding(
             padding: const EdgeInsets.fromLTRB(16, 16, 16, 16),
-            child: Row(
+            child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                    Icon(Icons.palette_outlined, color: cs.onSurfaceVariant, size: 22),
-                    const SizedBox(width: 16),
-                    const Expanded(
-                        child: Text(
-                            '테마',
-                            style: TextStyle(fontSize: 15),
-                        ),
+                    Row(
+                        children: [
+                            Icon(Icons.palette_outlined, color: cs.onSurfaceVariant, size: 22),
+                            const SizedBox(width: 16),
+                            const Text('테마', style: TextStyle(fontSize: 15)),
+                        ],
                     ),
+                    const SizedBox(height: 12),
                     SegmentedButton<ThemeMode>(
                         style: SegmentedButton.styleFrom(
-                            padding: const EdgeInsets.symmetric(horizontal: 12),
                             visualDensity: VisualDensity.compact,
+                            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                         ),
                         segments: const [
                             ButtonSegment(
@@ -145,6 +146,7 @@ class _ThemeTile extends ConsumerWidget {
                             ),
                         ],
                         selected: {themeMode},
+                        expandedInsets: EdgeInsets.zero,
                         onSelectionChanged: (selected) {
                             ref
                                 .read(themeModeProvider.notifier)
