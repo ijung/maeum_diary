@@ -214,17 +214,17 @@ class _CalendarGrid extends ConsumerWidget {
                 ),
             );
         } else {
-            // 수정 불가능한 과거 날짜에 기록이 없는 경우
             final today = date_utils.toLocalDate(DateTime.now());
-            final isPast = date_utils.toLocalDate(date).isBefore(today);
-            if (isPast) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                        content: Text('그날의 기록은 남아있지 않아요.'),
-                        behavior: SnackBarBehavior.floating,
-                    ),
-                );
-            }
+            final target = date_utils.toLocalDate(date);
+            final message = target.isAfter(today)
+                ? '아직 오지 않은 하루예요.'
+                : '그날의 기록은 남아있지 않아요.';
+            ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                    content: Text(message),
+                    behavior: SnackBarBehavior.floating,
+                ),
+            );
         }
     }
 
