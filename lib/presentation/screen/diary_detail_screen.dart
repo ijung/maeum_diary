@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:maeum_diary/core/utils/date_utils.dart';
+import 'package:maeum_diary/domain/entity/diary_entry.dart';
 import 'package:maeum_diary/domain/value_object/emotion.dart';
 import 'package:maeum_diary/presentation/provider/diary_provider.dart';
 import 'package:maeum_diary/presentation/screen/diary_edit_screen.dart';
@@ -64,8 +65,12 @@ class DiaryDetailScreen extends ConsumerWidget {
                                 ),
                                 const SizedBox(height: 32),
                                 // 메모
-                                if (entry.memo != null && entry.memo!.isNotEmpty)
+                                if (entry.memo != null && entry.memo!.isNotEmpty) ...[
                                     _MemoDisplay(memo: entry.memo!),
+                                    const SizedBox(height: 24),
+                                ],
+                                // 작성/수정 일시
+                                _TimestampDisplay(entry: entry),
                             ],
                         ),
                     );
@@ -159,6 +164,46 @@ class _MemoDisplay extends StatelessWidget {
                         ),
                     ),
                 ),
+            ],
+        );
+    }
+}
+
+// ─── 작성/수정 일시 표시 ───────────────────────────────────────────────────────
+
+class _TimestampDisplay extends StatelessWidget {
+    final DiaryEntry entry;
+
+    const _TimestampDisplay({required this.entry});
+
+    static final _fmt = DateFormat('yyyy년 M월 d일 HH:mm', 'ko');
+
+    @override
+    Widget build(BuildContext context) {
+        final color = Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.45);
+        final style = TextStyle(fontSize: 12, color: color);
+        final isModified = entry.updatedAt.difference(entry.createdAt).inSeconds > 1;
+
+        return Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+                Row(
+                    children: [
+                        Icon(Icons.access_time_rounded, size: 13, color: color),
+                        const SizedBox(width: 4),
+                        Text('작성: ${_fmt.format(entry.createdAt)}', style: style),
+                    ],
+                ),
+                if (isModified) ...[
+                    const SizedBox(height: 4),
+                    Row(
+                        children: [
+                            Icon(Icons.edit_outlined, size: 13, color: color),
+                            const SizedBox(width: 4),
+                            Text('수정: ${_fmt.format(entry.updatedAt)}', style: style),
+                        ],
+                    ),
+                ],
             ],
         );
     }
