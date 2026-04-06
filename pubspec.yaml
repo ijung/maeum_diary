@@ -47,6 +47,7 @@ dev_dependencies:
   flutter_lints: ^6.0.0
   mocktail: ^1.0.4
   flutter_native_splash: ^2.4.3
+  flutter_launcher_icons: ^0.14.4
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
@@ -59,6 +60,10 @@ flutter_native_splash:
     color: '#FEF7F0'
     image: assets/images/splash_android12.png
     icon_background_color: '#FEF7F0'
+
+flutter_launcher_icons:
+  android: true
+  image_path: "assets/images/app_icon.png"
 
 flutter:
 
