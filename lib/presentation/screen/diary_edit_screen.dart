@@ -92,6 +92,7 @@ class _DiaryEditScreenState extends ConsumerState<DiaryEditScreen> {
                         _EmotionPicker(
                             selected: _selectedEmotions,
                             onToggle: _toggleEmotion,
+                            onMaxReached: _onEmotionMaxReached,
                         ),
                         const SizedBox(height: 32),
                         const _SectionLabel(label: '메모 (선택)'),
@@ -115,6 +116,15 @@ class _DiaryEditScreenState extends ConsumerState<DiaryEditScreen> {
                             ),
                     ],
                 ),
+            ),
+        );
+    }
+
+    void _onEmotionMaxReached() {
+        ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+                content: Text('감정은 최대 3개까지 선택할 수 있어요.'),
+                behavior: SnackBarBehavior.floating,
             ),
         );
     }
@@ -190,10 +200,12 @@ class _SectionLabel extends StatelessWidget {
 class _EmotionPicker extends StatelessWidget {
     final List<Emotion> selected;
     final ValueChanged<Emotion> onToggle;
+    final VoidCallback onMaxReached;
 
     const _EmotionPicker({
         required this.selected,
         required this.onToggle,
+        required this.onMaxReached,
     });
 
     @override
@@ -209,7 +221,7 @@ class _EmotionPicker extends StatelessWidget {
                 final isDisabled = !isSelected && isMaxSelected;
 
                 return GestureDetector(
-                    onTap: isDisabled ? null : () => onToggle(emotion),
+                    onTap: isDisabled ? onMaxReached : () => onToggle(emotion),
                     child: AnimatedContainer(
                         duration: const Duration(milliseconds: 150),
                         padding: const EdgeInsets.symmetric(
