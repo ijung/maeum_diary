@@ -92,10 +92,17 @@ final class NotificationSettingsNotifier
         final next = current.copyWith(enabled: enabled);
         state = AsyncData(next);
 
-        await NotificationService.instance.reschedule(
-            enabled: enabled,
-            time: next.time,
-        );
+        try {
+            await NotificationService.instance.reschedule(
+                enabled: enabled,
+                time: next.time,
+            );
+        } catch (_) {
+            // 스케줄링 실패 시 저장된 설정을 원래대로 롤백
+            await prefs.setBool(_enabledKey, current.enabled);
+            state = AsyncData(current);
+            rethrow;
+        }
     }
 
     Future<void> setTime(TimeOfDay time) async {
@@ -109,10 +116,18 @@ final class NotificationSettingsNotifier
         final next = current.copyWith(time: time);
         state = AsyncData(next);
 
-        await NotificationService.instance.reschedule(
-            enabled: next.enabled,
-            time: time,
-        );
+        try {
+            await NotificationService.instance.reschedule(
+                enabled: next.enabled,
+                time: time,
+            );
+        } catch (_) {
+            // 스케줄링 실패 시 저장된 시간을 원래대로 롤백
+            await prefs.setInt(_hourKey, current.time.hour);
+            await prefs.setInt(_minuteKey, current.time.minute);
+            state = AsyncData(current);
+            rethrow;
+        }
     }
 }
 

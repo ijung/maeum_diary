@@ -15,7 +15,9 @@
       "Bash(python3:*)",
       "Bash(find:*)",
       "Bash(identify:*)",
-      "Bash(magick:*)"
+      "Bash(magick:*)",
+      "Bash(flutter build:*)",
+      "Bash(cat ~/.pub-cache/hosted/pub.dev/flutter_local_notifications-18.0.1/android/src/main/res/xml/*.xml)"
     ]
   }
 }

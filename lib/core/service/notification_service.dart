@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:flutter_timezone/flutter_timezone.dart';
 import 'package:timezone/data/latest_all.dart' as tz;
 import 'package:timezone/timezone.dart' as tz;
 
@@ -11,6 +12,7 @@ class NotificationService {
     NotificationService._();
 
     final _plugin = FlutterLocalNotificationsPlugin();
+    AndroidFlutterLocalNotificationsPlugin? _androidImpl;
 
     static const int _dailyNotificationId = 0;
     static const String _channelId = 'daily_reminder';
@@ -19,7 +21,9 @@ class NotificationService {
     /// 알림 플러그인 초기화 (main()에서 호출)
     Future<void> initialize() async {
         tz.initializeTimeZones();
-        tz.setLocalLocation(tz.getLocation('Asia/Seoul'));
+        // 기기의 실제 로컬 타임존 사용 (5.x API: TimezoneInfo.identifier)
+        final timezoneInfo = await FlutterTimezone.getLocalTimezone();
+        tz.setLocalLocation(tz.getLocation(timezoneInfo.identifier));
 
         const androidSettings = AndroidInitializationSettings('@mipmap/ic_launcher');
         const iosSettings = DarwinInitializationSettings(
@@ -34,19 +38,21 @@ class NotificationService {
                 iOS: iosSettings,
             ),
         );
+
+        // 플랫폼별 구현체는 초기화 후 한 번만 resolve
+        _androidImpl = _plugin
+            .resolvePlatformSpecificImplementation<
+                AndroidFlutterLocalNotificationsPlugin>();
     }
 
     /// 알림 권한 요청 (Android 13+ / iOS)
     ///
     /// 반환값: 사용자가 권한을 허용했으면 true
     Future<bool> requestPermission() async {
-        // Android 13+ (API 33) 런타임 권한 요청
-        final androidImpl = _plugin
-            .resolvePlatformSpecificImplementation<
-                AndroidFlutterLocalNotificationsPlugin>();
-        if (androidImpl != null) {
-            final granted = await androidImpl.requestNotificationsPermission();
-            return granted ?? false;
+        if (_androidImpl != null) {
+            final granted = await _androidImpl!.requestNotificationsPermission();
+            // null → Android 12 이하(API < 33): 권한 불필요, 자동 허용으로 처리
+            return granted ?? true;
         }
 
         // iOS 권한 요청
@@ -58,13 +64,15 @@ class NotificationService {
             badge: true,
             sound: true,
         );
-        return result ?? false;
+        // null → 이미 권한이 결정된 상태. 현재 권한 상태를 확인
+        return result ?? true;
     }
 
     /// 알림 스케줄 재설정
     ///
     /// [enabled]가 false면 기존 알림을 모두 취소한다.
     /// [enabled]가 true면 [time]에 매일 반복 알림을 등록한다.
+    /// 실패 시 예외를 던진다.
     Future<void> reschedule({
         required bool enabled,
         required TimeOfDay time,
@@ -87,6 +95,10 @@ class NotificationService {
             scheduled = scheduled.add(const Duration(days: 1));
         }
 
+        // USE_EXACT_ALARM(API 33+) 또는 SCHEDULE_EXACT_ALARM(API 31-32) 허용 여부 확인
+        final canExact =
+            await _androidImpl?.canScheduleExactNotifications() ?? false;
+
         await _plugin.zonedSchedule(
             _dailyNotificationId,
             '오늘 하루는 어떠셨나요?',
@@ -101,8 +113,10 @@ class NotificationService {
                 ),
                 iOS: DarwinNotificationDetails(),
             ),
-            // 일기 알림은 정확한 시각 불필요 — 권한 없이도 동작하는 inexact 모드 사용
-            androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
+            // exact alarm 가능하면 정확하게, 아니면 inexact로 폴백
+            androidScheduleMode: canExact
+                ? AndroidScheduleMode.exactAllowWhileIdle
+                : AndroidScheduleMode.inexactAllowWhileIdle,
             uiLocalNotificationDateInterpretation:
                 UILocalNotificationDateInterpretation.absoluteTime,
             // 매일 같은 시각에 반복

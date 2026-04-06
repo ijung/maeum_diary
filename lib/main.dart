@@ -34,8 +34,9 @@ Future<void> _rescheduleNotificationFromPrefs() async {
             enabled: enabled,
             time: TimeOfDay(hour: hour, minute: minute),
         );
-    } catch (_) {
-        // 알림 설정 로드 실패 시 무시 (앱 실행은 계속)
+    } catch (e, st) {
+        // 알림 재스케줄링 실패 시 앱 실행은 계속하되 에러를 기록
+        debugPrint('[NotificationService] 재스케줄링 실패: $e\n$st');
     }
 }
 
