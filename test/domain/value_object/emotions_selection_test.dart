@@ -96,6 +96,19 @@ void main() {
         });
     });
 
+    group('contains', () {
+        test('선택된 감정은 true를 반환한다', () {
+            final sel = EmotionsSelection([Emotion.happy, Emotion.sad]);
+            expect(sel.contains(Emotion.happy), isTrue);
+            expect(sel.contains(Emotion.sad), isTrue);
+        });
+
+        test('선택되지 않은 감정은 false를 반환한다', () {
+            final sel = EmotionsSelection([Emotion.happy]);
+            expect(sel.contains(Emotion.sad), isFalse);
+        });
+    });
+
     group('동등성', () {
         test('같은 순서의 같은 감정은 동등하다', () {
             final a = EmotionsSelection([Emotion.happy, Emotion.sad]);
