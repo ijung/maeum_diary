@@ -121,7 +121,9 @@ class _DiaryEditScreenState extends ConsumerState<DiaryEditScreen> {
     }
 
     void _onEmotionMaxReached() {
-        ScaffoldMessenger.of(context).showSnackBar(
+        final messenger = ScaffoldMessenger.of(context);
+        messenger.clearSnackBars();
+        messenger.showSnackBar(
             const SnackBar(
                 content: Text('감정은 최대 3개까지 선택할 수 있어요.'),
                 behavior: SnackBarBehavior.floating,
@@ -151,7 +153,9 @@ class _DiaryEditScreenState extends ConsumerState<DiaryEditScreen> {
         try {
             selection = EmotionsSelection(_selectedEmotions);
         } on ArgumentError catch (e) {
-            ScaffoldMessenger.of(context).showSnackBar(
+            final messenger = ScaffoldMessenger.of(context);
+            messenger.clearSnackBars();
+            messenger.showSnackBar(
                 SnackBar(content: Text(e.message.toString())),
             );
             return;
