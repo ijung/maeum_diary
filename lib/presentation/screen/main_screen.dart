@@ -219,7 +219,9 @@ class _CalendarGrid extends ConsumerWidget {
             final message = target.isAfter(today)
                 ? '아직 오지 않은 하루예요.'
                 : '그날의 기록은 남아있지 않아요.';
-            ScaffoldMessenger.of(context).showSnackBar(
+            final messenger = ScaffoldMessenger.of(context);
+            messenger.clearSnackBars();
+            messenger.showSnackBar(
                 SnackBar(
                     content: Text(message),
                     behavior: SnackBarBehavior.floating,
