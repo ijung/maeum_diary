@@ -287,16 +287,58 @@ class _DateCell extends StatelessWidget {
                             ),
                         ),
                         const SizedBox(height: 2),
-                        // 이모지 (있을 경우)
+                        // 선택된 감정 이모지 — 겹쳐서 한 줄 표시
                         if (entry != null)
-                            Text(
-                                entry!.emotions.values.first.emoji,
-                                style: const TextStyle(fontSize: 18),
-                            )
+                            _OverlappingEmojis(emotions: entry!.emotions.values)
                         else
-                            const SizedBox(height: 20),
+                            const SizedBox(height: 16),
                     ],
                 ),
+            ),
+        );
+    }
+}
+
+// ─── 겹치는 이모지 행 ──────────────────────────────────────────────────────────
+
+/// 이모지를 일부 겹쳐서 한 줄로 표시하는 위젯
+///
+/// 셀 너비 초과를 막기 위해 [_step]만큼씩 오른쪽으로 이동하며 배치한다.
+class _OverlappingEmojis extends StatelessWidget {
+    final Iterable<Emotion> emotions;
+
+    /// 이모지 폰트 크기 (렌더링 높이 ≈ fontSize * 1.3)
+    static const double _fontSize = 13;
+
+    /// 각 이모지 사이의 간격 (겹치도록 fontSize보다 작게 유지)
+    static const double _step = 9;
+
+    const _OverlappingEmojis({required this.emotions});
+
+    @override
+    Widget build(BuildContext context) {
+        final list = emotions.toList();
+        // 전체 너비: (n-1) * step + 이모지 한 글자 폭(≈fontSize * 1.3)
+        final double totalWidth =
+            (list.length - 1) * _step + _fontSize * 1.3;
+        const double height = _fontSize * 1.35;
+
+        return SizedBox(
+            width: totalWidth,
+            height: height,
+            child: Stack(
+                children: [
+                    // 역순으로 렌더링해 첫 번째 이모지가 가장 위(앞)에 표시되게 한다
+                    for (int i = list.length - 1; i >= 0; i--)
+                        Positioned(
+                            left: i * _step,
+                            top: 0,
+                            child: Text(
+                                list[i].emoji,
+                                style: const TextStyle(fontSize: _fontSize),
+                            ),
+                        ),
+                ],
             ),
         );
     }
