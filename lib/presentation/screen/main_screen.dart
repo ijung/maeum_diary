@@ -207,12 +207,21 @@ class _CalendarGrid extends ConsumerWidget {
                     builder: (_) => DiaryDetailScreen(date: date),
                 ),
             );
+        } else if (date_utils.isEditableDate(date)) {
+            Navigator.of(context).push(
+                MaterialPageRoute(
+                    builder: (_) => DiaryEditScreen(date: date),
+                ),
+            );
         } else {
-            // 오늘/어제만 새 일기 작성 가능
-            if (date_utils.isEditableDate(date)) {
-                Navigator.of(context).push(
-                    MaterialPageRoute(
-                        builder: (_) => DiaryEditScreen(date: date),
+            // 수정 불가능한 과거 날짜에 기록이 없는 경우
+            final today = date_utils.toLocalDate(DateTime.now());
+            final isPast = date_utils.toLocalDate(date).isBefore(today);
+            if (isPast) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                        content: Text('그날의 기록은 남아있지 않아요.'),
+                        behavior: SnackBarBehavior.floating,
                     ),
                 );
             }
