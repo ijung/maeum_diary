@@ -2,9 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:maeum_diary/core/service/notification_service.dart';
+import 'package:maeum_diary/core/utils/date_utils.dart' as date_utils;
 import 'package:maeum_diary/presentation/provider/settings_provider.dart';
+import 'package:maeum_diary/presentation/screen/diary_edit_screen.dart';
 import 'package:maeum_diary/presentation/screen/main_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+
+/// 앱 전역 네비게이터 키 — 알림 탭 시 화면 전환에 사용
+final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
 void main() async {
     WidgetsFlutterBinding.ensureInitialized();
@@ -18,6 +23,26 @@ void main() async {
     runApp(
         const ProviderScope(
             child: MaeumDiaryApp(),
+        ),
+    );
+
+    // runApp 이후에 탭 핸들러 등록 (navigatorKey가 활성화된 뒤)
+    NotificationService.instance.setOnNotificationTap(_navigateToTodayDiary);
+
+    // 앱 종료 상태에서 알림 탭으로 실행된 경우 (cold start) 처리
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+        if (await NotificationService.instance.didLaunchFromNotification()) {
+            _navigateToTodayDiary();
+        }
+    });
+}
+
+/// 알림 탭 시 오늘 날짜 일기 작성 화면으로 이동
+void _navigateToTodayDiary() {
+    final today = date_utils.toLocalDate(DateTime.now());
+    navigatorKey.currentState?.push(
+        MaterialPageRoute(
+            builder: (_) => DiaryEditScreen(date: today),
         ),
     );
 }
@@ -52,6 +77,7 @@ class MaeumDiaryApp extends ConsumerWidget {
         return MaterialApp(
             title: '마음 일기',
             debugShowCheckedModeBanner: false,
+            navigatorKey: navigatorKey,
             themeMode: themeMode,
             // 한국어 로케일 지원 (intl 날짜 포맷용)
             localizationsDelegates: const [

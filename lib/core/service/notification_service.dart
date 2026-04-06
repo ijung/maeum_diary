@@ -14,9 +14,25 @@ class NotificationService {
     final _plugin = FlutterLocalNotificationsPlugin();
     AndroidFlutterLocalNotificationsPlugin? _androidImpl;
 
+    /// 알림 탭 시 실행할 콜백 (main.dart에서 등록)
+    ///
+    /// Presentation 레이어와 분리하기 위해 콜백으로 주입받는다.
+    void Function()? _onNotificationTap;
+
     static const int _dailyNotificationId = 0;
     static const String _channelId = 'daily_reminder';
     static const String _channelName = '매일 일기 알림';
+
+    /// 알림 탭 핸들러 등록
+    void setOnNotificationTap(void Function() handler) {
+        _onNotificationTap = handler;
+    }
+
+    /// 앱이 알림 탭으로 실행됐는지 확인 (cold start 처리용)
+    Future<bool> didLaunchFromNotification() async {
+        final details = await _plugin.getNotificationAppLaunchDetails();
+        return details?.didNotificationLaunchApp == true;
+    }
 
     /// 알림 플러그인 초기화 (main()에서 호출)
     Future<void> initialize() async {
@@ -37,6 +53,10 @@ class NotificationService {
                 android: androidSettings,
                 iOS: iosSettings,
             ),
+            // 앱이 포그라운드/백그라운드 상태에서 알림 탭 시 호출
+            onDidReceiveNotificationResponse: (_) {
+                _onNotificationTap?.call();
+            },
         );
 
         // 플랫폼별 구현체는 초기화 후 한 번만 resolve
@@ -64,7 +84,7 @@ class NotificationService {
             badge: true,
             sound: true,
         );
-        // null → 이미 권한이 결정된 상태. 현재 권한 상태를 확인
+        // null → 이미 권한이 결정된 상태, 자동 허용으로 처리
         return result ?? true;
     }
 
