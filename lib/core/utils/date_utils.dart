@@ -10,13 +10,22 @@ DateTime toLocalDate(DateTime dt) {
     return DateTime(dt.year, dt.month, dt.day);
 }
 
-/// [date]가 오늘 또는 어제인지 판별한다.
+/// [date]의 일기가 작성·수정 가능한 상태인지 판별한다.
+///
+/// 규칙:
+/// - 오늘 날짜 → 항상 가능
+/// - 어제 날짜 → 오늘 15시 이전까지만 가능
+/// - 그 외 → 불가능
 ///
 /// - [now]: 테스트에서 현재 시각을 주입할 때 사용한다. null이면 [DateTime.now()]를 사용한다.
-/// - 비교는 로컬 날짜(시각 제외) 기준으로 수행된다.
+/// - 날짜 비교는 로컬 날짜(시각 제외) 기준으로 수행된다.
 bool isEditableDate(DateTime date, {DateTime? now}) {
-    final today = toLocalDate(now ?? DateTime.now());
+    final actualNow = now ?? DateTime.now();
+    final today = toLocalDate(actualNow);
     final target = toLocalDate(date);
     final diff = today.difference(target).inDays;
-    return diff == 0 || diff == 1;
+
+    if (diff == 0) return true;
+    if (diff == 1) return actualNow.hour < 15;
+    return false;
 }

@@ -24,7 +24,7 @@ void main() {
     late MockDiaryRepository mockRepository;
     late SaveDiaryUseCase useCase;
 
-    // 현재 시각 고정: 2024-06-15 12:00:00
+    // 현재 시각 고정: 2024-06-15 12:00:00 (15시 이전)
     final fixedNow = DateTime(2024, 6, 15, 12, 0);
     final today = DateTime(2024, 6, 15);
     final yesterday = DateTime(2024, 6, 14);
@@ -85,6 +85,35 @@ void main() {
             );
 
             expect(failure, isA<EditNotAllowedFailure>());
+        });
+
+        test('어제 날짜이지만 오늘 15시 이후면 EditNotAllowedFailure를 반환한다', () async {
+            final useCaseAfter15 = SaveDiaryUseCase(
+                repository: mockRepository,
+                nowFactory: () => DateTime(2024, 6, 15, 15, 0),
+            );
+
+            final failure = await useCaseAfter15.execute(
+                SaveDiaryInput(date: yesterday, emotions: sampleEmotions),
+            );
+
+            expect(failure, isA<EditNotAllowedFailure>());
+            verifyNever(() => mockRepository.save(any()));
+        });
+
+        test('어제 날짜이고 오늘 14시 59분이면 저장에 성공한다', () async {
+            final useCaseBefore15 = SaveDiaryUseCase(
+                repository: mockRepository,
+                nowFactory: () => DateTime(2024, 6, 15, 14, 59),
+            );
+            when(() => mockRepository.findByDate(any())).thenAnswer((_) async => null);
+
+            final failure = await useCaseBefore15.execute(
+                SaveDiaryInput(date: yesterday, emotions: sampleEmotions),
+            );
+
+            expect(failure, isNull);
+            verify(() => mockRepository.save(any())).called(1);
         });
     });
 

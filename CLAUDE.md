@@ -56,7 +56,7 @@ Presentation → Application → Domain ← Infrastructure
 
 ### 핵심 도메인 규칙
 
-- **수정 가능 날짜**: 오늘 또는 어제만 일기 작성·수정 가능 (`core/utils/date_utils.dart:isEditableDate`)
+- **수정 가능 날짜**: 오늘은 항상 가능, 어제 날짜는 오늘 15시 이전까지만 작성·수정 가능 (`core/utils/date_utils.dart:isEditableDate`)
 - **감정 선택**: 1~3개, 중복 불허 (`domain/value_object/emotions_selection.dart`)
 - **메모**: 옵셔널, 500자 제한 — 도메인과 UseCase 두 레벨에서 검증
 - **날짜 비교**: 반드시 로컬 시간 기준, `toLocalDate()`로 정규화 후 비교
