@@ -1,0 +1,102 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:timezone/data/latest_all.dart' as tz;
+import 'package:timezone/timezone.dart' as tz;
+
+/// 로컬 알림 서비스 — 싱글턴
+///
+/// 매일 설정된 시각에 일기 작성 알림을 스케줄링한다.
+class NotificationService {
+    static final NotificationService instance = NotificationService._();
+    NotificationService._();
+
+    final _plugin = FlutterLocalNotificationsPlugin();
+
+    static const int _dailyNotificationId = 0;
+    static const String _channelId = 'daily_reminder';
+    static const String _channelName = '매일 일기 알림';
+
+    /// 알림 플러그인 초기화 (main()에서 호출)
+    Future<void> initialize() async {
+        tz.initializeTimeZones();
+        tz.setLocalLocation(tz.getLocation('Asia/Seoul'));
+
+        const androidSettings = AndroidInitializationSettings('@mipmap/ic_launcher');
+        const iosSettings = DarwinInitializationSettings(
+            requestAlertPermission: false,
+            requestBadgePermission: false,
+            requestSoundPermission: false,
+        );
+
+        await _plugin.initialize(
+            const InitializationSettings(
+                android: androidSettings,
+                iOS: iosSettings,
+            ),
+        );
+    }
+
+    /// iOS 알림 권한 요청
+    ///
+    /// [granted]: 사용자가 권한을 허용했으면 true
+    Future<bool> requestPermission() async {
+        final iosImpl = _plugin
+            .resolvePlatformSpecificImplementation<
+                IOSFlutterLocalNotificationsPlugin>();
+        final result = await iosImpl?.requestPermissions(
+            alert: true,
+            badge: true,
+            sound: true,
+        );
+        return result ?? false;
+    }
+
+    /// 알림 스케줄 재설정
+    ///
+    /// [enabled]가 false면 기존 알림을 모두 취소한다.
+    /// [enabled]가 true면 [time]에 매일 반복 알림을 등록한다.
+    Future<void> reschedule({
+        required bool enabled,
+        required TimeOfDay time,
+    }) async {
+        await _plugin.cancelAll();
+        if (!enabled) return;
+
+        final now = tz.TZDateTime.now(tz.local);
+        var scheduled = tz.TZDateTime(
+            tz.local,
+            now.year,
+            now.month,
+            now.day,
+            time.hour,
+            time.minute,
+        );
+
+        // 이미 지난 시각이면 다음날로 설정
+        if (scheduled.isBefore(now)) {
+            scheduled = scheduled.add(const Duration(days: 1));
+        }
+
+        await _plugin.zonedSchedule(
+            _dailyNotificationId,
+            '오늘 하루는 어떠셨나요?',
+            '마음 일기를 기록해보세요.',
+            scheduled,
+            const NotificationDetails(
+                android: AndroidNotificationDetails(
+                    _channelId,
+                    _channelName,
+                    importance: Importance.high,
+                    priority: Priority.high,
+                ),
+                iOS: DarwinNotificationDetails(),
+            ),
+            // 일기 알림은 정확한 시각 불필요 — 권한 없이도 동작하는 inexact 모드 사용
+            androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
+            uiLocalNotificationDateInterpretation:
+                UILocalNotificationDateInterpretation.absoluteTime,
+            // 매일 같은 시각에 반복
+            matchDateTimeComponents: DateTimeComponents.time,
+        );
+    }
+}

@@ -7,6 +7,7 @@ import 'package:maeum_diary/domain/value_object/emotion.dart';
 import 'package:maeum_diary/presentation/provider/calendar_provider.dart';
 import 'package:maeum_diary/presentation/screen/diary_detail_screen.dart';
 import 'package:maeum_diary/presentation/screen/diary_edit_screen.dart';
+import 'package:maeum_diary/presentation/screen/settings_screen.dart';
 
 /// 앱의 메인 화면 — 월 캘린더
 class MainScreen extends ConsumerWidget {
@@ -27,6 +28,17 @@ class MainScreen extends ConsumerWidget {
                     ),
                 ),
                 centerTitle: true,
+                actions: [
+                    IconButton(
+                        icon: const Icon(Icons.settings_outlined),
+                        tooltip: '설정',
+                        onPressed: () => Navigator.of(context).push(
+                            MaterialPageRoute(
+                                builder: (_) => const SettingsScreen(),
+                            ),
+                        ),
+                    ),
+                ],
             ),
             body: const Column(
                 children: [
