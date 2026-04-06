@@ -4,7 +4,18 @@
       "Bash(flutter pub:*)",
       "Bash(flutter test:*)",
       "Bash(flutter analyze:*)",
-      "Skill(update-config)"
+      "Skill(update-config)",
+      "Bash(dart run:*)",
+      "Bash(xargs cat:*)",
+      "Bash(sips -g pixelWidth -g pixelHeight /Users/june.dev/Codes/github.com/ijung/maeum_diary/assets/images/splash.png)",
+      "Bash(identify /Users/june.dev/Codes/github.com/ijung/maeum_diary/assets/images/splash.png)",
+      "Bash(python3 -c \"from PIL import Image; img = Image.open\\('/Users/june.dev/Codes/github.com/ijung/maeum_diary/assets/images/splash.png'\\); print\\(f'Size: {img.size}'\\)\")",
+      "Bash(sips:*)",
+      "Bash(python3 -c ':*)",
+      "Bash(python3:*)",
+      "Bash(find:*)",
+      "Bash(identify:*)",
+      "Bash(magick:*)"
     ]
   }
 }
