@@ -96,6 +96,7 @@ class NotificationService {
     Future<void> reschedule({
         required bool enabled,
         required TimeOfDay time,
+        bool skipToday = false,
     }) async {
         await _plugin.cancelAll();
         if (!enabled) return;
@@ -110,8 +111,8 @@ class NotificationService {
             time.minute,
         );
 
-        // 이미 지난 시각이면 다음날로 설정
-        if (scheduled.isBefore(now)) {
+        // 오늘을 건너뛰거나 이미 지난 시각이면 다음날로 설정
+        if (skipToday || scheduled.isBefore(now)) {
             scheduled = scheduled.add(const Duration(days: 1));
         }
 

@@ -1,10 +1,15 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:maeum_diary/application/use_case/save_diary_use_case.dart';
+import 'package:maeum_diary/core/service/notification_service.dart';
+import 'package:maeum_diary/core/utils/date_utils.dart' as date_utils;
 import 'package:maeum_diary/domain/value_object/emotion.dart';
 import 'package:maeum_diary/domain/value_object/emotions_selection.dart';
 import 'package:maeum_diary/presentation/provider/diary_provider.dart';
+import 'package:maeum_diary/presentation/provider/settings_provider.dart';
 
 /// 일기 작성 / 수정 화면
 class DiaryEditScreen extends ConsumerStatefulWidget {
@@ -174,6 +179,23 @@ class _DiaryEditScreenState extends ConsumerState<DiaryEditScreen> {
         if (!mounted) return;
 
         if (success) {
+            // 오늘 일기 저장 + 알림 ON + alwaysNotify OFF → 오늘 알림 건너뜀
+            final today = date_utils.toLocalDate(DateTime.now());
+            if (widget.date == today) {
+                final notifSettings =
+                    ref.read(notificationSettingsProvider).valueOrNull;
+                if (notifSettings != null &&
+                    notifSettings.enabled &&
+                    !notifSettings.alwaysNotify) {
+                    unawaited(
+                        NotificationService.instance.reschedule(
+                            enabled: true,
+                            time: notifSettings.time,
+                            skipToday: true,
+                        ),
+                    );
+                }
+            }
             Navigator.of(context).pop();
         }
     }

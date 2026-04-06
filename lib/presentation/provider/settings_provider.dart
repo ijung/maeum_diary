@@ -36,16 +36,23 @@ final themeModeProvider =
 class NotificationSettings {
     final bool enabled;
     final TimeOfDay time;
+    final bool alwaysNotify;
 
     const NotificationSettings({
         required this.enabled,
         required this.time,
+        required this.alwaysNotify,
     });
 
-    NotificationSettings copyWith({bool? enabled, TimeOfDay? time}) {
+    NotificationSettings copyWith({
+        bool? enabled,
+        TimeOfDay? time,
+        bool? alwaysNotify,
+    }) {
         return NotificationSettings(
             enabled: enabled ?? this.enabled,
             time: time ?? this.time,
+            alwaysNotify: alwaysNotify ?? this.alwaysNotify,
         );
     }
 }
@@ -59,6 +66,7 @@ final class NotificationSettingsNotifier
     static const String _enabledKey = 'notif_enabled';
     static const String _hourKey = 'notif_hour';
     static const String _minuteKey = 'notif_minute';
+    static const String _alwaysNotifyKey = 'notif_always_notify';
 
     // 기본 알림 시각: 21:00
     static const int _defaultHour = 21;
@@ -73,6 +81,7 @@ final class NotificationSettingsNotifier
                 hour: prefs.getInt(_hourKey) ?? _defaultHour,
                 minute: prefs.getInt(_minuteKey) ?? _defaultMinute,
             ),
+            alwaysNotify: prefs.getBool(_alwaysNotifyKey) ?? false,
         );
     }
 
@@ -103,6 +112,15 @@ final class NotificationSettingsNotifier
             state = AsyncData(current);
             rethrow;
         }
+    }
+
+    Future<void> setAlwaysNotify(bool value) async {
+        final current = state.valueOrNull;
+        if (current == null) return;
+
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.setBool(_alwaysNotifyKey, value);
+        state = AsyncData(current.copyWith(alwaysNotify: value));
     }
 
     Future<void> setTime(TimeOfDay time) async {

@@ -30,6 +30,7 @@ class SettingsScreen extends StatelessWidget {
                     _SectionHeader('알림'),
                     _NotificationSwitchTile(),
                     _NotificationTimeTile(),
+                    _AlwaysNotifyTile(),
                     Divider(indent: 16, endIndent: 16),
                     _SectionHeader('앱 정보'),
                     _AppVersionTile(),
@@ -180,6 +181,26 @@ class _NotificationTimeTile extends ConsumerWidget {
         final displayHour = hour == 0 ? 12 : (hour > 12 ? hour - 12 : hour);
         final displayMinute = minute.toString().padLeft(2, '0');
         return '$period $displayHour:$displayMinute';
+    }
+}
+
+class _AlwaysNotifyTile extends ConsumerWidget {
+    const _AlwaysNotifyTile();
+
+    @override
+    Widget build(BuildContext context, WidgetRef ref) {
+        final settings = ref.watch(notificationSettingsProvider).valueOrNull;
+
+        return SwitchListTile(
+            title: const Text('이미 일기를 작성했어도 알림 받기'),
+            value: settings?.alwaysNotify ?? false,
+            // 알림이 꺼져 있으면 비활성화
+            onChanged: (settings?.enabled == true)
+                ? (value) => ref
+                    .read(notificationSettingsProvider.notifier)
+                    .setAlwaysNotify(value)
+                : null,
+        );
     }
 }
 
