@@ -80,9 +80,10 @@ final class NotificationSettingsNotifier
         final current = state.valueOrNull;
         if (current == null) return;
 
-        // iOS 권한 요청
+        // 알림 활성화 시 권한 요청 — 거부되면 상태 변경 없이 종료
         if (enabled) {
-            await NotificationService.instance.requestPermission();
+            final granted = await NotificationService.instance.requestPermission();
+            if (!granted) return;
         }
 
         final prefs = await SharedPreferences.getInstance();

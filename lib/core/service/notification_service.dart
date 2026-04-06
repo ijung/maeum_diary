@@ -36,10 +36,20 @@ class NotificationService {
         );
     }
 
-    /// iOS 알림 권한 요청
+    /// 알림 권한 요청 (Android 13+ / iOS)
     ///
-    /// [granted]: 사용자가 권한을 허용했으면 true
+    /// 반환값: 사용자가 권한을 허용했으면 true
     Future<bool> requestPermission() async {
+        // Android 13+ (API 33) 런타임 권한 요청
+        final androidImpl = _plugin
+            .resolvePlatformSpecificImplementation<
+                AndroidFlutterLocalNotificationsPlugin>();
+        if (androidImpl != null) {
+            final granted = await androidImpl.requestNotificationsPermission();
+            return granted ?? false;
+        }
+
+        // iOS 권한 요청
         final iosImpl = _plugin
             .resolvePlatformSpecificImplementation<
                 IOSFlutterLocalNotificationsPlugin>();
