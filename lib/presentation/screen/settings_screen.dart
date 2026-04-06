@@ -8,56 +8,96 @@ class SettingsScreen extends StatelessWidget {
 
     @override
     Widget build(BuildContext context) {
+        final cs = Theme.of(context).colorScheme;
+
         return Scaffold(
-            backgroundColor: Theme.of(context).colorScheme.surface,
+            backgroundColor: cs.surfaceContainerLowest,
             appBar: AppBar(
-                backgroundColor: Theme.of(context).colorScheme.surface,
+                backgroundColor: cs.surfaceContainerLowest,
                 elevation: 0,
                 title: const Text(
                     '설정',
-                    style: TextStyle(
-                        fontWeight: FontWeight.w700,
-                        fontSize: 20,
-                    ),
+                    style: TextStyle(fontWeight: FontWeight.w700, fontSize: 20),
                 ),
                 centerTitle: true,
             ),
             body: ListView(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                 children: const [
-                    _SectionHeader('테마'),
-                    _ThemeTile(),
-                    Divider(indent: 16, endIndent: 16),
-                    _SectionHeader('알림'),
-                    _NotificationSwitchTile(),
-                    _NotificationTimeTile(),
-                    _AlwaysNotifyTile(),
-                    Divider(indent: 16, endIndent: 16),
-                    _SectionHeader('앱 정보'),
-                    _AppVersionTile(),
+                    _SectionLabel('테마'),
+                    _SectionCard(children: [_ThemeTile()]),
+                    _SectionLabel('알림'),
+                    _SectionCard(
+                        children: [
+                            _NotificationSwitchTile(),
+                            _SectionDivider(),
+                            _NotificationTimeTile(),
+                            _SectionDivider(),
+                            _AlwaysNotifyTile(),
+                        ],
+                    ),
+                    _SectionLabel('앱 정보'),
+                    _SectionCard(children: [_AppVersionTile()]),
+                    SizedBox(height: 24),
                 ],
             ),
         );
     }
 }
 
-// ─── 섹션 헤더 ────────────────────────────────────────────────────────────────
+// ─── 공통 레이아웃 ────────────────────────────────────────────────────────────
 
-class _SectionHeader extends StatelessWidget {
-    final String title;
-    const _SectionHeader(this.title);
+class _SectionLabel extends StatelessWidget {
+    final String text;
+    const _SectionLabel(this.text);
 
     @override
     Widget build(BuildContext context) {
         return Padding(
-            padding: const EdgeInsets.fromLTRB(16, 20, 16, 8),
+            padding: const EdgeInsets.fromLTRB(4, 20, 4, 8),
             child: Text(
-                title,
+                text,
                 style: TextStyle(
-                    fontSize: 13,
+                    fontSize: 12,
                     fontWeight: FontWeight.w600,
+                    letterSpacing: 0.5,
                     color: Theme.of(context).colorScheme.primary,
                 ),
             ),
+        );
+    }
+}
+
+class _SectionCard extends StatelessWidget {
+    final List<Widget> children;
+    const _SectionCard({required this.children});
+
+    @override
+    Widget build(BuildContext context) {
+        return Card(
+            elevation: 0,
+            margin: EdgeInsets.zero,
+            color: Theme.of(context).colorScheme.surfaceContainerLow,
+            shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(16),
+            ),
+            child: Column(
+                children: children,
+            ),
+        );
+    }
+}
+
+class _SectionDivider extends StatelessWidget {
+    const _SectionDivider();
+
+    @override
+    Widget build(BuildContext context) {
+        return Divider(
+            height: 1,
+            indent: 56,
+            endIndent: 16,
+            color: Theme.of(context).colorScheme.outlineVariant.withValues(alpha: 0.5),
         );
     }
 }
@@ -71,30 +111,37 @@ class _ThemeTile extends ConsumerWidget {
     Widget build(BuildContext context, WidgetRef ref) {
         final themeMode =
             ref.watch(themeModeProvider).valueOrNull ?? ThemeMode.system;
+        final cs = Theme.of(context).colorScheme;
 
         return Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-            child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+            padding: const EdgeInsets.fromLTRB(16, 16, 16, 16),
+            child: Row(
                 children: [
-                    const Text('테마 설정', style: TextStyle(fontSize: 15)),
-                    const SizedBox(height: 10),
+                    Icon(Icons.palette_outlined, color: cs.onSurfaceVariant, size: 22),
+                    const SizedBox(width: 16),
+                    const Expanded(
+                        child: Text(
+                            '테마',
+                            style: TextStyle(fontSize: 15),
+                        ),
+                    ),
                     SegmentedButton<ThemeMode>(
+                        style: SegmentedButton.styleFrom(
+                            padding: const EdgeInsets.symmetric(horizontal: 12),
+                            visualDensity: VisualDensity.compact,
+                        ),
                         segments: const [
                             ButtonSegment(
                                 value: ThemeMode.system,
                                 label: Text('시스템'),
-                                icon: Icon(Icons.brightness_auto_outlined),
                             ),
                             ButtonSegment(
                                 value: ThemeMode.light,
                                 label: Text('라이트'),
-                                icon: Icon(Icons.light_mode_outlined),
                             ),
                             ButtonSegment(
                                 value: ThemeMode.dark,
                                 label: Text('다크'),
-                                icon: Icon(Icons.dark_mode_outlined),
                             ),
                         ],
                         selected: {themeMode},
@@ -117,20 +164,23 @@ class _NotificationSwitchTile extends ConsumerWidget {
 
     @override
     Widget build(BuildContext context, WidgetRef ref) {
-        final settingsAsync = ref.watch(notificationSettingsProvider);
-        final settings = settingsAsync.valueOrNull;
+        final settings = ref.watch(notificationSettingsProvider).valueOrNull;
 
         return SwitchListTile(
-            title: const Text('매일 일기 알림'),
+            contentPadding: const EdgeInsets.symmetric(horizontal: 16),
+            secondary: Icon(
+                Icons.notifications_outlined,
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+                size: 22,
+            ),
+            title: const Text('매일 일기 알림', style: TextStyle(fontSize: 15)),
             subtitle: const Text('설정한 시간에 일기 작성을 알려드려요'),
             value: settings?.enabled ?? false,
             onChanged: settings == null
                 ? null
-                : (value) {
-                    ref
-                        .read(notificationSettingsProvider.notifier)
-                        .setEnabled(value);
-                },
+                : (value) => ref
+                    .read(notificationSettingsProvider.notifier)
+                    .setEnabled(value),
         );
     }
 }
@@ -140,20 +190,36 @@ class _NotificationTimeTile extends ConsumerWidget {
 
     @override
     Widget build(BuildContext context, WidgetRef ref) {
-        final settingsAsync = ref.watch(notificationSettingsProvider);
-        final settings = settingsAsync.valueOrNull;
+        final settings = ref.watch(notificationSettingsProvider).valueOrNull;
         final enabled = settings?.enabled ?? false;
         final time = settings?.time ?? const TimeOfDay(hour: 21, minute: 0);
+        final cs = Theme.of(context).colorScheme;
 
         return ListTile(
-            title: const Text('알림 시간'),
-            trailing: Text(
-                _formatTime(time),
-                style: TextStyle(
-                    fontSize: 15,
+            contentPadding: const EdgeInsets.symmetric(horizontal: 16),
+            leading: Icon(
+                Icons.access_time_outlined,
+                color: cs.onSurfaceVariant,
+                size: 22,
+            ),
+            title: const Text('알림 시간', style: TextStyle(fontSize: 15)),
+            trailing: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                decoration: BoxDecoration(
                     color: enabled
-                        ? Theme.of(context).colorScheme.primary
-                        : Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.4),
+                        ? cs.primaryContainer
+                        : cs.surfaceContainerHighest,
+                    borderRadius: BorderRadius.circular(8),
+                ),
+                child: Text(
+                    _formatTime(time),
+                    style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
+                        color: enabled
+                            ? cs.onPrimaryContainer
+                            : cs.onSurface.withValues(alpha: 0.38),
+                    ),
                 ),
             ),
             enabled: enabled,
@@ -192,9 +258,15 @@ class _AlwaysNotifyTile extends ConsumerWidget {
         final settings = ref.watch(notificationSettingsProvider).valueOrNull;
 
         return SwitchListTile(
-            title: const Text('이미 일기를 작성했어도 알림 받기'),
+            contentPadding: const EdgeInsets.symmetric(horizontal: 16),
+            secondary: Icon(
+                Icons.edit_calendar_outlined,
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+                size: 22,
+            ),
+            title: const Text('일기 작성 후에도 알림', style: TextStyle(fontSize: 15)),
+            subtitle: const Text('오늘 일기를 썼어도 알림을 받아요'),
             value: settings?.alwaysNotify ?? false,
-            // 알림이 꺼져 있으면 비활성화
             onChanged: (settings?.enabled == true)
                 ? (value) => ref
                     .read(notificationSettingsProvider.notifier)
@@ -211,31 +283,40 @@ class _AppVersionTile extends ConsumerWidget {
 
     @override
     Widget build(BuildContext context, WidgetRef ref) {
+        final cs = Theme.of(context).colorScheme;
+
         return ref.watch(packageInfoProvider).when(
             data: (info) => ListTile(
-                title: const Text('버전'),
+                contentPadding: const EdgeInsets.symmetric(horizontal: 16),
+                leading: Icon(
+                    Icons.info_outline,
+                    color: cs.onSurfaceVariant,
+                    size: 22,
+                ),
+                title: const Text('버전', style: TextStyle(fontSize: 15)),
                 trailing: Text(
                     '${info.version} (${info.buildNumber})',
                     style: TextStyle(
-                        fontSize: 14,
-                        color: Theme.of(context)
-                            .colorScheme
-                            .onSurface
-                            .withValues(alpha: 0.6),
+                        fontSize: 13,
+                        color: cs.onSurface.withValues(alpha: 0.5),
                     ),
                 ),
             ),
-            loading: () => const ListTile(
-                title: Text('버전'),
+            loading: () => ListTile(
+                contentPadding: const EdgeInsets.symmetric(horizontal: 16),
+                leading: Icon(Icons.info_outline, color: cs.onSurfaceVariant, size: 22),
+                title: const Text('버전', style: TextStyle(fontSize: 15)),
                 trailing: SizedBox(
                     width: 16,
                     height: 16,
-                    child: CircularProgressIndicator(strokeWidth: 2),
+                    child: CircularProgressIndicator(strokeWidth: 2, color: cs.primary),
                 ),
             ),
-            error: (_, _) => const ListTile(
-                title: Text('버전'),
-                trailing: Text('-'),
+            error: (_, _) => ListTile(
+                contentPadding: const EdgeInsets.symmetric(horizontal: 16),
+                leading: Icon(Icons.info_outline, color: cs.onSurfaceVariant, size: 22),
+                title: const Text('버전', style: TextStyle(fontSize: 15)),
+                trailing: Text('-', style: TextStyle(color: cs.onSurface.withValues(alpha: 0.5))),
             ),
         );
     }
