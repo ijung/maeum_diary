@@ -1,6 +1,7 @@
 /// 앱에서 지원하는 감정 이모지 목록
 enum Emotion {
     happy,    // 😊
+    calm,     // 😌
     sad,      // 😢
     angry,    // 😠
     anxious,  // 😰
@@ -15,6 +16,7 @@ extension EmotionExtension on Emotion {
     String get emoji {
         return switch (this) {
             Emotion.happy => '😊',
+            Emotion.calm => '😌',
             Emotion.sad => '😢',
             Emotion.angry => '😠',
             Emotion.anxious => '😰',
@@ -29,6 +31,7 @@ extension EmotionExtension on Emotion {
     String get label {
         return switch (this) {
             Emotion.happy => '행복',
+            Emotion.calm => '평온',
             Emotion.sad => '슬픔',
             Emotion.angry => '화남',
             Emotion.anxious => '불안',
