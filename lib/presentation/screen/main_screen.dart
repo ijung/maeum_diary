@@ -256,7 +256,7 @@ class _CalendarGrid extends ConsumerWidget {
                 ? '아직 오지 않은 하루예요.'
                 : '그날의 기록은 남아있지 않아요.';
             final message =
-                holidayName != null ? '$holidayName · $base' : base;
+                holidayName != null ? '$holidayName\n$base' : base;
 
             messenger.showSnackBar(
                 SnackBar(
