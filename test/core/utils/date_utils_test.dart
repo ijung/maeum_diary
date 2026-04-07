@@ -16,6 +16,24 @@ void main() {
         });
     });
 
+    group('toDateKey', () {
+        test('날짜를 yyyy-MM-dd 형식 문자열로 변환한다', () {
+            expect(toDateKey(DateTime(2024, 6, 15)), '2024-06-15');
+        });
+
+        test('월·일이 한 자리일 때 0으로 채운다', () {
+            expect(toDateKey(DateTime(2024, 1, 5)), '2024-01-05');
+        });
+
+        test('시각 정보가 있어도 날짜 부분만 사용한다', () {
+            expect(toDateKey(DateTime(2024, 12, 31, 23, 59, 59)), '2024-12-31');
+        });
+
+        test('월말 경계를 올바르게 처리한다', () {
+            expect(toDateKey(DateTime(2024, 2, 29)), '2024-02-29');
+        });
+    });
+
     group('isEditableDate', () {
         // 기본 픽스처: 오늘 12시 (15시 이전)
         final nowBefore15 = DateTime(2024, 6, 15, 12, 0, 0);

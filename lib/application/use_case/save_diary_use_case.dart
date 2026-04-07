@@ -61,7 +61,6 @@ final class SaveDiaryUseCase {
         }
 
         final existing = await _repository.findByDate(input.date);
-        final localNow = DateTime.now();
 
         if (existing == null) {
             // 신규 저장
@@ -70,8 +69,8 @@ final class SaveDiaryUseCase {
                 date: toLocalDate(input.date),
                 emotions: input.emotions,
                 memo: (trimmedMemo?.isEmpty ?? true) ? null : trimmedMemo,
-                createdAt: localNow,
-                updatedAt: localNow,
+                createdAt: now,
+                updatedAt: now,
             );
             await _repository.save(entry);
         } else {
@@ -80,7 +79,7 @@ final class SaveDiaryUseCase {
                 emotions: input.emotions,
                 memo: (trimmedMemo?.isEmpty ?? true) ? null : trimmedMemo,
                 clearMemo: trimmedMemo == null || trimmedMemo.isEmpty,
-                updatedAt: localNow,
+                updatedAt: now,
             );
             await _repository.update(updated);
         }

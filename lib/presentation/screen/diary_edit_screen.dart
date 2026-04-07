@@ -274,12 +274,7 @@ class _EmotionPicker extends StatelessWidget {
                             children: [
                                 Text(
                                     emotion.emoji,
-                                    style: TextStyle(
-                                        fontSize: 22,
-                                        color: isDisabled
-                                            ? null
-                                            : null,
-                                    ),
+                                    style: const TextStyle(fontSize: 22),
                                 ),
                                 const SizedBox(width: 6),
                                 Text(

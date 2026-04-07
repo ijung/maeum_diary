@@ -10,6 +10,17 @@ DateTime toLocalDate(DateTime dt) {
     return DateTime(dt.year, dt.month, dt.day);
 }
 
+/// [DateTime]을 'yyyy-MM-dd' 형식의 날짜 키로 변환한다.
+///
+/// 캘린더와 저장소에서 날짜를 Map 키로 사용할 때 공통으로 사용한다.
+String toDateKey(DateTime dt) {
+    final local = toLocalDate(dt);
+    final y = local.year.toString().padLeft(4, '0');
+    final m = local.month.toString().padLeft(2, '0');
+    final d = local.day.toString().padLeft(2, '0');
+    return '$y-$m-$d';
+}
+
 /// [date]의 일기가 작성·수정 가능한 상태인지 판별한다.
 ///
 /// 규칙:

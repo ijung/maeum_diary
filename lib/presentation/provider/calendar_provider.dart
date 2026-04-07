@@ -1,5 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:maeum_diary/core/di/providers.dart';
+import 'package:maeum_diary/core/utils/date_utils.dart' as date_utils;
 import 'package:maeum_diary/domain/entity/diary_entry.dart';
 
 /// 현재 표시 중인 월 (기본값: 이번 달)
@@ -25,13 +26,6 @@ final monthlyDiaryProvider =
     final entries = await useCase.execute(month.year, month.month);
 
     return {
-        for (final e in entries) _toKey(e.date): e,
+        for (final e in entries) date_utils.toDateKey(e.date): e,
     };
 });
-
-String _toKey(DateTime dt) {
-    final y = dt.year.toString().padLeft(4, '0');
-    final m = dt.month.toString().padLeft(2, '0');
-    final d = dt.day.toString().padLeft(2, '0');
-    return '$y-$m-$d';
-}

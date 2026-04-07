@@ -215,5 +215,107 @@ void main() {
             final updatedEntry = captured.first as DiaryEntry;
             expect(updatedEntry.id, 'original-id');
         });
+
+        test('update 시 메모를 null로 전달하면 기존 메모가 제거된다', () async {
+            final existing = DiaryEntry(
+                id: 'existing-id',
+                date: today,
+                emotions: EmotionsSelection([Emotion.sad]),
+                memo: '기존 메모',
+                createdAt: fixedNow,
+                updatedAt: fixedNow,
+            );
+            when(() => mockRepository.findByDate(any()))
+                .thenAnswer((_) async => existing);
+
+            await useCase.execute(
+                SaveDiaryInput(date: today, emotions: sampleEmotions),
+            );
+
+            final captured = verify(() => mockRepository.update(captureAny())).captured;
+            final updatedEntry = captured.first as DiaryEntry;
+            expect(updatedEntry.memo, isNull);
+        });
+
+        test('update 시 공백 메모를 전달하면 기존 메모가 제거된다', () async {
+            final existing = DiaryEntry(
+                id: 'existing-id',
+                date: today,
+                emotions: EmotionsSelection([Emotion.sad]),
+                memo: '기존 메모',
+                createdAt: fixedNow,
+                updatedAt: fixedNow,
+            );
+            when(() => mockRepository.findByDate(any()))
+                .thenAnswer((_) async => existing);
+
+            await useCase.execute(
+                SaveDiaryInput(date: today, emotions: sampleEmotions, memo: '   '),
+            );
+
+            final captured = verify(() => mockRepository.update(captureAny())).captured;
+            final updatedEntry = captured.first as DiaryEntry;
+            expect(updatedEntry.memo, isNull);
+        });
+
+        test('update 시 새 메모를 전달하면 기존 메모가 교체된다', () async {
+            final existing = DiaryEntry(
+                id: 'existing-id',
+                date: today,
+                emotions: EmotionsSelection([Emotion.sad]),
+                memo: '기존 메모',
+                createdAt: fixedNow,
+                updatedAt: fixedNow,
+            );
+            when(() => mockRepository.findByDate(any()))
+                .thenAnswer((_) async => existing);
+
+            await useCase.execute(
+                SaveDiaryInput(date: today, emotions: sampleEmotions, memo: '새 메모'),
+            );
+
+            final captured = verify(() => mockRepository.update(captureAny())).captured;
+            final updatedEntry = captured.first as DiaryEntry;
+            expect(updatedEntry.memo, '새 메모');
+        });
+
+        test('신규 저장 시 createdAt과 updatedAt이 nowFactory의 시각으로 설정된다', () async {
+            when(() => mockRepository.findByDate(any())).thenAnswer((_) async => null);
+
+            await useCase.execute(
+                SaveDiaryInput(date: today, emotions: sampleEmotions),
+            );
+
+            final captured = verify(() => mockRepository.save(captureAny())).captured;
+            final savedEntry = captured.first as DiaryEntry;
+            expect(savedEntry.createdAt, fixedNow);
+            expect(savedEntry.updatedAt, fixedNow);
+        });
+
+        test('update 시 updatedAt이 nowFactory의 시각으로 갱신된다', () async {
+            final existing = DiaryEntry(
+                id: 'existing-id',
+                date: today,
+                emotions: EmotionsSelection([Emotion.sad]),
+                createdAt: fixedNow,
+                updatedAt: fixedNow,
+            );
+            when(() => mockRepository.findByDate(any()))
+                .thenAnswer((_) async => existing);
+            final laterNow = DateTime(2024, 6, 15, 13, 0);
+            final useCaseLater = SaveDiaryUseCase(
+                repository: mockRepository,
+                nowFactory: () => laterNow,
+            );
+
+            await useCaseLater.execute(
+                SaveDiaryInput(date: today, emotions: sampleEmotions),
+            );
+
+            final captured = verify(() => mockRepository.update(captureAny())).captured;
+            final updatedEntry = captured.first as DiaryEntry;
+            expect(updatedEntry.updatedAt, laterNow);
+            expect(updatedEntry.createdAt, fixedNow);
+        });
     });
 }

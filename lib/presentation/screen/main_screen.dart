@@ -184,7 +184,7 @@ class _CalendarGrid extends ConsumerWidget {
                         final isSelected = cellDate ==
                             date_utils.toLocalDate(selectedDate);
 
-                        final dateKey = _toKey(cellDate);
+                        final dateKey = date_utils.toDateKey(cellDate);
                         final entry = diaryMap[dateKey];
 
                         return _DateCell(
@@ -242,12 +242,6 @@ class _CalendarGrid extends ConsumerWidget {
         }
     }
 
-    String _toKey(DateTime dt) {
-        final y = dt.year.toString().padLeft(4, '0');
-        final m = dt.month.toString().padLeft(2, '0');
-        final d = dt.day.toString().padLeft(2, '0');
-        return '$y-$m-$d';
-    }
 }
 
 // ─── 날짜 셀 ──────────────────────────────────────────────────────────────────
