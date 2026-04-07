@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -14,6 +15,9 @@ final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
 void main() async {
     WidgetsFlutterBinding.ensureInitialized();
+
+    // Android 15 edge-to-edge: deprecated setStatusBarColor / setNavigationBarColor 호출 방지
+    await SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
 
     // .env 파일 로드 (없거나 파싱 실패해도 앱 실행 유지)
     await dotenv.load(fileName: '.env').catchError((_) {});
