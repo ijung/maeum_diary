@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:maeum_diary/core/service/notification_service.dart';
@@ -13,6 +14,9 @@ final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
 void main() async {
     WidgetsFlutterBinding.ensureInitialized();
+
+    // .env 파일 로드 (없거나 파싱 실패해도 앱 실행 유지)
+    await dotenv.load(fileName: '.env').catchError((_) {});
 
     // 알림 서비스 초기화
     await NotificationService.instance.initialize();

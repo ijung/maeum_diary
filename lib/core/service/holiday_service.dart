@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
 import 'package:maeum_diary/core/utils/date_utils.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -14,8 +15,8 @@ class HolidayService {
     static final HolidayService instance = HolidayService._();
     HolidayService._();
 
-    // API 키: flutter run --dart-define=HOLIDAY_API_KEY=... 로 주입
-    static const String _apiKey = String.fromEnvironment('HOLIDAY_API_KEY');
+    // API 키: 프로젝트 루트 .env 파일의 HOLIDAY_API_KEY 값을 사용한다.
+    static String get _apiKey => dotenv.maybeGet('HOLIDAY_API_KEY') ?? '';
 
     static const String _baseUrl =
         'https://apis.data.go.kr/B090041/openapi/service'
@@ -35,7 +36,11 @@ class HolidayService {
 
         try {
             final holidays = await _fetchFromApi(year);
-            await _saveToCache(year, holidays);
+            // 빈 결과는 캐시하지 않는다.
+            // API 오류·파싱 실패로 빈 Set이 반환된 경우 다음 실행 시 재시도해야 한다.
+            if (holidays.isNotEmpty) {
+                await _saveToCache(year, holidays);
+            }
             return holidays;
         } catch (_) {
             return {};
@@ -46,8 +51,9 @@ class HolidayService {
         final prefs = await SharedPreferences.getInstance();
         final json = prefs.getString(_cacheKey(year));
         if (json == null) return null;
-        final list = jsonDecode(json) as List;
-        return list.cast<String>().toSet();
+        final set = (jsonDecode(json) as List).cast<String>().toSet();
+        // 빈 Set은 유효한 캐시로 취급하지 않는다 (API 재시도 허용)
+        return set.isEmpty ? null : set;
     }
 
     Future<void> _saveToCache(int year, Set<String> holidays) async {
