@@ -144,6 +144,7 @@ class _CalendarGrid extends ConsumerWidget {
         final month = ref.watch(selectedMonthProvider);
         final selectedDate = ref.watch(selectedDateProvider);
         final diaryAsync = ref.watch(monthlyDiaryProvider);
+        final holidays = ref.watch(holidayProvider(month.year)).valueOrNull ?? {};
 
         // 해당 월의 첫 날
         final firstDay = DateTime(month.year, month.month, 1);
@@ -186,12 +187,14 @@ class _CalendarGrid extends ConsumerWidget {
 
                         final dateKey = date_utils.toDateKey(cellDate);
                         final entry = diaryMap[dateKey];
+                        final isHoliday = holidays.contains(dateKey);
 
                         return _DateCell(
                             date: cellDate,
                             entry: entry,
                             isToday: isToday,
                             isSelected: isSelected,
+                            isHoliday: isHoliday,
                             onTap: () => _onDateTap(
                                 context,
                                 ref,
@@ -251,6 +254,7 @@ class _DateCell extends StatelessWidget {
     final DiaryEntry? entry;
     final bool isToday;
     final bool isSelected;
+    final bool isHoliday;
     final VoidCallback onTap;
 
     const _DateCell({
@@ -258,6 +262,7 @@ class _DateCell extends StatelessWidget {
         required this.entry,
         required this.isToday,
         required this.isSelected,
+        required this.isHoliday,
         required this.onTap,
     });
 
@@ -268,8 +273,9 @@ class _DateCell extends StatelessWidget {
         final isSaturday = date.weekday == DateTime.saturday;
 
         Color dayColor = colorScheme.onSurface;
-        if (isSunday) dayColor = Colors.red.shade400;
-        if (isSaturday) dayColor = Colors.blue.shade400;
+        // 공휴일(일요일 포함)은 빨간색, 토요일 공휴일도 빨간색 우선
+        if (isSunday || isHoliday) dayColor = Colors.red.shade400;
+        if (isSaturday && !isHoliday) dayColor = Colors.blue.shade400;
 
         return GestureDetector(
             onTap: onTap,
