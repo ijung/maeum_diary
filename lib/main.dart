@@ -8,7 +8,6 @@ import 'package:maeum_diary/core/utils/date_utils.dart' as date_utils;
 import 'package:maeum_diary/presentation/provider/settings_provider.dart';
 import 'package:maeum_diary/presentation/screen/diary_edit_screen.dart';
 import 'package:maeum_diary/presentation/screen/main_screen.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 /// 앱 전역 네비게이터 키 — 알림 탭 시 화면 전환에 사용
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
@@ -58,15 +57,7 @@ void _navigateToTodayDiary() {
 /// 앱 시작 시 저장된 알림 설정을 읽어 재스케줄링
 Future<void> _rescheduleNotificationFromPrefs() async {
     try {
-        final prefs = await SharedPreferences.getInstance();
-        final enabled = prefs.getBool('notif_enabled') ?? false;
-        final hour = prefs.getInt('notif_hour') ?? 21;
-        final minute = prefs.getInt('notif_minute') ?? 0;
-
-        await NotificationService.instance.reschedule(
-            enabled: enabled,
-            time: TimeOfDay(hour: hour, minute: minute),
-        );
+        await NotificationService.instance.rescheduleFromPrefs();
     } catch (e, st) {
         // 알림 재스케줄링 실패 시 앱 실행은 계속하되 에러를 기록
         debugPrint('[NotificationService] 재스케줄링 실패: $e\n$st');
