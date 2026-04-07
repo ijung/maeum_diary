@@ -16,11 +16,11 @@ final selectedDateProvider = StateProvider<DateTime>((ref) {
     return DateTime(now.year, now.month, now.day);
 });
 
-/// [year]년 공휴일 날짜 Set (yyyy-MM-dd)
+/// [year]년 공휴일 Map<'yyyy-MM-dd', 공휴일명>
 ///
-/// API 실패 또는 API 키 미설정 시 빈 Set을 반환해 앱 정상 동작을 보장한다.
+/// API 실패 또는 API 키 미설정 시 빈 Map을 반환해 앱 정상 동작을 보장한다.
 final holidayProvider =
-    FutureProvider.autoDispose.family<Set<String>, int>((ref, year) {
+    FutureProvider.autoDispose.family<Map<String, String>, int>((ref, year) {
     return HolidayService.instance.getHolidaysForYear(year);
 });
 

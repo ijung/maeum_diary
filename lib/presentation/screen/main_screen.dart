@@ -187,19 +187,20 @@ class _CalendarGrid extends ConsumerWidget {
 
                         final dateKey = date_utils.toDateKey(cellDate);
                         final entry = diaryMap[dateKey];
-                        final isHoliday = holidays.contains(dateKey);
+                        final holidayName = holidays[dateKey];
 
                         return _DateCell(
                             date: cellDate,
                             entry: entry,
                             isToday: isToday,
                             isSelected: isSelected,
-                            isHoliday: isHoliday,
+                            holidayName: holidayName,
                             onTap: () => _onDateTap(
                                 context,
                                 ref,
                                 cellDate,
                                 entry,
+                                holidayName,
                             ),
                         );
                     },
@@ -213,16 +214,36 @@ class _CalendarGrid extends ConsumerWidget {
         WidgetRef ref,
         DateTime date,
         DiaryEntry? entry,
+        String? holidayName,
     ) {
         ref.read(selectedDateProvider.notifier).state = date;
 
+        final messenger = ScaffoldMessenger.of(context);
+        messenger.clearSnackBars();
+
         if (entry != null) {
+            if (holidayName != null) {
+                messenger.showSnackBar(
+                    SnackBar(
+                        content: Text(holidayName),
+                        behavior: SnackBarBehavior.floating,
+                    ),
+                );
+            }
             Navigator.of(context).push(
                 MaterialPageRoute(
                     builder: (_) => DiaryDetailScreen(date: date),
                 ),
             );
         } else if (date_utils.isEditableDate(date)) {
+            if (holidayName != null) {
+                messenger.showSnackBar(
+                    SnackBar(
+                        content: Text(holidayName),
+                        behavior: SnackBarBehavior.floating,
+                    ),
+                );
+            }
             Navigator.of(context).push(
                 MaterialPageRoute(
                     builder: (_) => DiaryEditScreen(date: date),
@@ -231,11 +252,12 @@ class _CalendarGrid extends ConsumerWidget {
         } else {
             final today = date_utils.toLocalDate(DateTime.now());
             final target = date_utils.toLocalDate(date);
-            final message = target.isAfter(today)
+            final base = target.isAfter(today)
                 ? '아직 오지 않은 하루예요.'
                 : '그날의 기록은 남아있지 않아요.';
-            final messenger = ScaffoldMessenger.of(context);
-            messenger.clearSnackBars();
+            final message =
+                holidayName != null ? '$holidayName · $base' : base;
+
             messenger.showSnackBar(
                 SnackBar(
                     content: Text(message),
@@ -244,7 +266,6 @@ class _CalendarGrid extends ConsumerWidget {
             );
         }
     }
-
 }
 
 // ─── 날짜 셀 ──────────────────────────────────────────────────────────────────
@@ -254,7 +275,7 @@ class _DateCell extends StatelessWidget {
     final DiaryEntry? entry;
     final bool isToday;
     final bool isSelected;
-    final bool isHoliday;
+    final String? holidayName;
     final VoidCallback onTap;
 
     const _DateCell({
@@ -262,7 +283,7 @@ class _DateCell extends StatelessWidget {
         required this.entry,
         required this.isToday,
         required this.isSelected,
-        required this.isHoliday,
+        required this.holidayName,
         required this.onTap,
     });
 
@@ -271,6 +292,7 @@ class _DateCell extends StatelessWidget {
         final colorScheme = Theme.of(context).colorScheme;
         final isSunday = date.weekday == DateTime.sunday;
         final isSaturday = date.weekday == DateTime.saturday;
+        final isHoliday = holidayName != null;
 
         Color dayColor = colorScheme.onSurface;
         // 공휴일(일요일 포함)은 빨간색, 토요일 공휴일도 빨간색 우선
