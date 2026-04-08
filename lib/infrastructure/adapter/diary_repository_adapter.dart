@@ -16,8 +16,7 @@ final class DiaryRepositoryAdapter implements DiaryRepository {
 
     @override
     Future<DiaryEntry?> findByDate(DateTime date) async {
-        final dateStr = _formatDate(date);
-        final map = await _dataSource.queryByDate(dateStr);
+        final map = await _dataSource.queryByDate(toDateKey(date));
         if (map == null) return null;
         return DiaryEntryDto.fromMap(map).toDomain();
     }
@@ -40,12 +39,4 @@ final class DiaryRepositoryAdapter implements DiaryRepository {
         await _dataSource.update(dto.toMap());
     }
 
-    /// [DateTime]을 'yyyy-MM-dd' 형식으로 변환한다.
-    String _formatDate(DateTime dt) {
-        final local = toLocalDate(dt);
-        final y = local.year.toString().padLeft(4, '0');
-        final m = local.month.toString().padLeft(2, '0');
-        final d = local.day.toString().padLeft(2, '0');
-        return '$y-$m-$d';
-    }
 }

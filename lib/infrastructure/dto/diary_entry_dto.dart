@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:maeum_diary/core/utils/date_utils.dart';
 import 'package:maeum_diary/domain/entity/diary_entry.dart';
 import 'package:maeum_diary/domain/value_object/emotion.dart';
 import 'package:maeum_diary/domain/value_object/emotions_selection.dart';
@@ -70,7 +71,7 @@ final class DiaryEntryDto {
             entry.emotions.values.map((e) => e.name).toList();
         return DiaryEntryDto(
             id: entry.id,
-            date: _formatDate(entry.date),
+            date: toDateKey(entry.date),
             emotions: jsonEncode(emotionNames),
             memo: entry.memo,
             createdAt: entry.createdAt.toIso8601String(),
@@ -100,14 +101,6 @@ final class DiaryEntryDto {
     }
 
     // ─── 내부 유틸 ────────────────────────────────────────────────────────────
-
-    /// [DateTime]을 'yyyy-MM-dd' 형식 문자열로 변환한다.
-    static String _formatDate(DateTime dt) {
-        final y = dt.year.toString().padLeft(4, '0');
-        final m = dt.month.toString().padLeft(2, '0');
-        final d = dt.day.toString().padLeft(2, '0');
-        return '$y-$m-$d';
-    }
 
     /// 'yyyy-MM-dd' 문자열을 [DateTime]으로 변환한다.
     static DateTime _parseDate(String s) {
