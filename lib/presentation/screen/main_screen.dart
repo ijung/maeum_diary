@@ -221,7 +221,8 @@ class _CalendarGrid extends ConsumerWidget {
         final messenger = ScaffoldMessenger.of(context);
         messenger.clearSnackBars();
 
-        if (entry != null) {
+        if (entry != null || date_utils.isEditableDate(date)) {
+            // 작성·조회 가능한 날짜: 공휴일이면 이름 표시 후 화면 전환
             if (holidayName != null) {
                 messenger.showSnackBar(
                     SnackBar(
@@ -232,24 +233,13 @@ class _CalendarGrid extends ConsumerWidget {
             }
             Navigator.of(context).push(
                 MaterialPageRoute(
-                    builder: (_) => DiaryDetailScreen(date: date),
-                ),
-            );
-        } else if (date_utils.isEditableDate(date)) {
-            if (holidayName != null) {
-                messenger.showSnackBar(
-                    SnackBar(
-                        content: Text(holidayName),
-                        behavior: SnackBarBehavior.floating,
-                    ),
-                );
-            }
-            Navigator.of(context).push(
-                MaterialPageRoute(
-                    builder: (_) => DiaryEditScreen(date: date),
+                    builder: (_) => entry != null
+                        ? DiaryDetailScreen(date: date)
+                        : DiaryEditScreen(date: date),
                 ),
             );
         } else {
+            // 작성 불가 날짜: 사유 메시지 표시
             final today = date_utils.toLocalDate(DateTime.now());
             final target = date_utils.toLocalDate(date);
             final base = target.isAfter(today)

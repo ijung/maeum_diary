@@ -25,7 +25,9 @@
       "Bash(avdmanager create:*)",
       "Bash(sdkmanager system-images;android-36;google_apis;arm64-v8a:*)",
       "Bash(avdmanager delete:*)",
-      "Bash(grep:*)"
+      "Bash(grep:*)",
+      "Bash(wc -l lib/**/*.dart)",
+      "Bash(wc -l test/**/*.dart)"
     ]
   }
 }
