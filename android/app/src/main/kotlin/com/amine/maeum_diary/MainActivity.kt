@@ -1,13 +1,13 @@
 package com.amine.maeum_diary
 
 import android.os.Bundle
-import androidx.core.view.WindowCompat
-import io.flutter.embedding.android.FlutterActivity
+import androidx.activity.enableEdgeToEdge
+import io.flutter.embedding.android.FlutterFragmentActivity
 
-class MainActivity : FlutterActivity() {
+class MainActivity : FlutterFragmentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
+        // Flutter 초기화(super.onCreate) 전에 호출해야 window가 edge-to-edge로 먼저 구성됨
+        enableEdgeToEdge()
         super.onCreate(savedInstanceState)
-        // Android 15 edge-to-edge: 시스템 바 영역까지 앱 콘텐츠를 확장
-        WindowCompat.setDecorFitsSystemWindows(window, false)
     }
 }

@@ -16,7 +16,10 @@ final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 void main() async {
     WidgetsFlutterBinding.ensureInitialized();
 
-    // Android 15 edge-to-edge: deprecated setStatusBarColor / setNavigationBarColor 호출 방지
+    // Flutter 렌더링 레이어를 edge-to-edge 모드로 설정한다.
+    // Android 측 enableEdgeToEdge()와 쌍으로 동작하며,
+    // Flutter의 PlatformPlugin이 deprecated setStatusBarColor / setNavigationBarColor를
+    // 호출하지 않도록 억제한다.
     await SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
 
     // .env 파일 로드 (없거나 파싱 실패해도 앱 실행 유지)

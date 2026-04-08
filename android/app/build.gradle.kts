@@ -60,4 +60,6 @@ flutter {
 
 dependencies {
     coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.1.4")
+    // enableEdgeToEdge() 사용을 위해 필요 (ComponentActivity 확장 함수)
+    implementation("androidx.activity:activity-ktx:1.9.3")
 }
