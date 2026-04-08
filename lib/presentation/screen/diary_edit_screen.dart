@@ -179,7 +179,6 @@ class _DiaryEditScreenState extends ConsumerState<DiaryEditScreen> {
         if (!mounted) return;
 
         if (success) {
-            // 오늘 일기 저장 + 알림 ON + alwaysNotify OFF → 오늘 알림 건너뜀
             final today = date_utils.toLocalDate(DateTime.now());
             if (widget.date == today) {
                 final notifSettings =
@@ -187,6 +186,7 @@ class _DiaryEditScreenState extends ConsumerState<DiaryEditScreen> {
                 if (notifSettings != null &&
                     notifSettings.enabled &&
                     !notifSettings.alwaysNotify) {
+                    // 오늘 일기를 방금 저장했으므로 skipToday=true 확정
                     unawaited(
                         NotificationService.instance.reschedule(
                             enabled: true,

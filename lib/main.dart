@@ -5,6 +5,7 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:maeum_diary/core/service/notification_service.dart';
 import 'package:maeum_diary/core/utils/date_utils.dart' as date_utils;
+import 'package:maeum_diary/infrastructure/datasource/diary_local_data_source.dart';
 import 'package:maeum_diary/presentation/provider/settings_provider.dart';
 import 'package:maeum_diary/presentation/screen/diary_edit_screen.dart';
 import 'package:maeum_diary/presentation/screen/main_screen.dart';
@@ -55,9 +56,16 @@ void _navigateToTodayDiary() {
 }
 
 /// 앱 시작 시 저장된 알림 설정을 읽어 재스케줄링
+///
+/// Riverpod ProviderScope 바깥이므로 DiaryLocalDataSource.instance를 직접 사용해
+/// 오늘 일기 존재 여부를 조회한다.
 Future<void> _rescheduleNotificationFromPrefs() async {
     try {
-        await NotificationService.instance.rescheduleFromPrefs();
+        final today = date_utils.toDateKey(DateTime.now());
+        final row = await DiaryLocalDataSource.instance.queryByDate(today);
+        await NotificationService.instance.rescheduleFromPrefs(
+            hasDiaryToday: row != null,
+        );
     } catch (e, st) {
         // 알림 재스케줄링 실패 시 앱 실행은 계속하되 에러를 기록
         debugPrint('[NotificationService] 재스케줄링 실패: $e\n$st');

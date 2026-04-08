@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:maeum_diary/core/di/providers.dart';
 import 'package:maeum_diary/core/service/notification_service.dart';
+import 'package:maeum_diary/core/utils/date_utils.dart' as date_utils;
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -102,9 +104,11 @@ final class NotificationSettingsNotifier
         state = AsyncData(next);
 
         try {
+            final skipToday = enabled && !current.alwaysNotify && await _hasDiaryToday();
             await NotificationService.instance.reschedule(
                 enabled: enabled,
                 time: next.time,
+                skipToday: skipToday,
             );
         } catch (_) {
             // 스케줄링 실패 시 저장된 설정을 원래대로 롤백
@@ -121,6 +125,18 @@ final class NotificationSettingsNotifier
         final prefs = await SharedPreferences.getInstance();
         await prefs.setBool(_alwaysNotifyKey, value);
         state = AsyncData(current.copyWith(alwaysNotify: value));
+
+        // alwaysNotify를 끄면 오늘 일기 작성 여부에 따라 알림 재스케줄
+        // (일기를 이미 썼다면 오늘 알림을 건너뜀)
+        if (!value && current.enabled) {
+            try {
+                await NotificationService.instance.rescheduleFromPrefs(
+                    hasDiaryToday: await _hasDiaryToday(),
+                );
+            } catch (e, st) {
+                debugPrint('[NotificationService] alwaysNotify 변경 후 재스케줄링 실패: $e\n$st');
+            }
+        }
     }
 
     Future<void> setTime(TimeOfDay time) async {
@@ -131,21 +147,26 @@ final class NotificationSettingsNotifier
         await prefs.setInt(_hourKey, time.hour);
         await prefs.setInt(_minuteKey, time.minute);
 
-        final next = current.copyWith(time: time);
-        state = AsyncData(next);
+        // 시간 설정은 스케줄링 성공 여부와 무관하게 즉시 반영
+        state = AsyncData(current.copyWith(time: time));
 
         try {
+            final skipToday = current.enabled && !current.alwaysNotify && await _hasDiaryToday();
             await NotificationService.instance.reschedule(
-                enabled: next.enabled,
+                enabled: current.enabled,
                 time: time,
+                skipToday: skipToday,
             );
-        } catch (_) {
-            // 스케줄링 실패 시 저장된 시간을 원래대로 롤백
-            await prefs.setInt(_hourKey, current.time.hour);
-            await prefs.setInt(_minuteKey, current.time.minute);
-            state = AsyncData(current);
-            rethrow;
+        } catch (e, st) {
+            debugPrint('[NotificationService] 알림 시간 변경 후 재스케줄링 실패: $e\n$st');
         }
+    }
+
+    /// 오늘 일기 존재 여부를 DB에서 조회한다.
+    Future<bool> _hasDiaryToday() async {
+        final today = date_utils.toLocalDate(DateTime.now());
+        final entry = await ref.read(getDiaryByDateUseCaseProvider).execute(today);
+        return entry != null;
     }
 }
 

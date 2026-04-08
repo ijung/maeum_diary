@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_timezone/flutter_timezone.dart';
-import 'package:maeum_diary/core/utils/date_utils.dart' as date_utils;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:timezone/data/latest_all.dart' as tz;
 import 'package:timezone/timezone.dart' as tz;
@@ -30,8 +29,6 @@ class NotificationService {
     static const String _hourKey = 'notif_hour';
     static const String _minuteKey = 'notif_minute';
     static const String _alwaysNotifyKey = 'notif_always_notify';
-    /// 오늘 알림을 건너뛴 날짜 키 ('yyyy-MM-dd')
-    static const String _skipDateKey = 'notif_skip_date';
 
     /// 알림 탭 핸들러 등록
     void setOnNotificationTap(void Function() handler) {
@@ -100,21 +97,16 @@ class NotificationService {
 
     /// 저장된 설정으로 알림 재스케줄 (앱 재시작 시 호출)
     ///
-    /// SharedPreferences에서 알림 설정과 오늘 건너뜀 여부를 읽어 재스케줄링한다.
-    Future<void> rescheduleFromPrefs() async {
+    /// [hasDiaryToday]가 true이고 alwaysNotify=false인 경우 오늘 알림을 건너뛴다.
+    /// 호출부에서 오늘 일기 존재 여부를 조회해 전달해야 한다.
+    Future<void> rescheduleFromPrefs({bool hasDiaryToday = false}) async {
         final prefs = await SharedPreferences.getInstance();
         final enabled = prefs.getBool(_enabledKey) ?? false;
         final hour = prefs.getInt(_hourKey) ?? 21;
         final minute = prefs.getInt(_minuteKey) ?? 0;
         final alwaysNotify = prefs.getBool(_alwaysNotifyKey) ?? false;
 
-        // alwaysNotify=false이고 오늘 이미 건너뜀 → skipToday 유지
-        bool skipToday = false;
-        if (!alwaysNotify) {
-            final skipDate = prefs.getString(_skipDateKey);
-            final today = date_utils.toDateKey(DateTime.now());
-            skipToday = skipDate == today;
-        }
+        final skipToday = !alwaysNotify && hasDiaryToday;
 
         await reschedule(
             enabled: enabled,
@@ -135,15 +127,6 @@ class NotificationService {
     }) async {
         await _plugin.cancelAll();
         if (!enabled) return;
-
-        // 오늘 건너뜀 상태를 저장 (앱 재시작 후 복원용)
-        if (skipToday) {
-            final prefs = await SharedPreferences.getInstance();
-            await prefs.setString(
-                _skipDateKey,
-                date_utils.toDateKey(DateTime.now()),
-            );
-        }
 
         final now = tz.TZDateTime.now(tz.local);
         var scheduled = tz.TZDateTime(
@@ -184,8 +167,11 @@ class NotificationService {
                 : AndroidScheduleMode.inexactAllowWhileIdle,
             uiLocalNotificationDateInterpretation:
                 UILocalNotificationDateInterpretation.absoluteTime,
-            // 매일 같은 시각에 반복
-            matchDateTimeComponents: DateTimeComponents.time,
+            // skipToday=true일 때 matchDateTimeComponents를 사용하면
+            // Android가 날짜를 무시하고 "오늘 시각"으로 재계산하므로
+            // 한 번짜리 알림으로 내일에 발송하고, 앱 재시작 시 일일 반복으로 재설정됨
+            matchDateTimeComponents:
+                skipToday ? null : DateTimeComponents.time,
         );
     }
 }
