@@ -3,36 +3,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:maeum_diary/core/di/providers.dart';
 import 'package:maeum_diary/core/service/notification_service.dart';
 import 'package:maeum_diary/core/utils/date_utils.dart' as date_utils;
-import 'package:package_info_plus/package_info_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-// ─── 테마 모드 ────────────────────────────────────────────────────────────────
-
-/// 테마 모드 상태 관리
-///
-/// SharedPreferences에 'theme_mode' 키로 ThemeMode.index를 저장한다.
-final class ThemeModeNotifier extends AsyncNotifier<ThemeMode> {
-    static const String _key = 'theme_mode';
-
-    @override
-    Future<ThemeMode> build() async {
-        final prefs = await SharedPreferences.getInstance();
-        final index = prefs.getInt(_key) ?? 0;
-        // ThemeMode.values 순서: system=0, light=1, dark=2
-        return ThemeMode.values[index.clamp(0, ThemeMode.values.length - 1)];
-    }
-
-    Future<void> setThemeMode(ThemeMode mode) async {
-        final prefs = await SharedPreferences.getInstance();
-        await prefs.setInt(_key, mode.index);
-        state = AsyncData(mode);
-    }
-}
-
-final themeModeProvider =
-    AsyncNotifierProvider<ThemeModeNotifier, ThemeMode>(ThemeModeNotifier.new);
-
-// ─── 알림 설정 ────────────────────────────────────────────────────────────────
+// ─── 알림 설정 모델 ────────────────────────────────────────────────────────────
 
 /// 알림 설정 모델
 class NotificationSettings {
@@ -58,6 +31,8 @@ class NotificationSettings {
         );
     }
 }
+
+// ─── 알림 설정 상태 관리 ───────────────────────────────────────────────────────
 
 /// 알림 설정 상태 관리
 ///
@@ -173,9 +148,3 @@ final class NotificationSettingsNotifier
 final notificationSettingsProvider =
     AsyncNotifierProvider<NotificationSettingsNotifier, NotificationSettings>(
         NotificationSettingsNotifier.new);
-
-// ─── 앱 정보 ──────────────────────────────────────────────────────────────────
-
-/// 앱 버전 정보 조회 (package_info_plus)
-final packageInfoProvider =
-    FutureProvider<PackageInfo>((_) => PackageInfo.fromPlatform());

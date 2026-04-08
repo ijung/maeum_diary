@@ -9,7 +9,7 @@ import 'package:maeum_diary/core/utils/date_utils.dart' as date_utils;
 import 'package:maeum_diary/domain/value_object/emotion.dart';
 import 'package:maeum_diary/domain/value_object/emotions_selection.dart';
 import 'package:maeum_diary/presentation/provider/diary_provider.dart';
-import 'package:maeum_diary/presentation/provider/settings_provider.dart';
+import 'package:maeum_diary/presentation/provider/notification_settings_provider.dart';
 
 /// 일기 작성 / 수정 화면
 class DiaryEditScreen extends ConsumerStatefulWidget {

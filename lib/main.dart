@@ -6,7 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:maeum_diary/core/service/notification_service.dart';
 import 'package:maeum_diary/core/utils/date_utils.dart' as date_utils;
 import 'package:maeum_diary/infrastructure/datasource/diary_local_data_source.dart';
-import 'package:maeum_diary/presentation/provider/settings_provider.dart';
+import 'package:maeum_diary/presentation/provider/theme_provider.dart';
 import 'package:maeum_diary/presentation/screen/diary_edit_screen.dart';
 import 'package:maeum_diary/presentation/screen/main_screen.dart';
 

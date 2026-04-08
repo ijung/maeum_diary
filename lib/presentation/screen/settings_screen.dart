@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:maeum_diary/presentation/provider/settings_provider.dart';
+import 'package:maeum_diary/presentation/provider/app_info_provider.dart';
+import 'package:maeum_diary/presentation/provider/notification_settings_provider.dart';
+import 'package:maeum_diary/presentation/provider/theme_provider.dart';
 
 /// 설정 화면
 class SettingsScreen extends StatelessWidget {

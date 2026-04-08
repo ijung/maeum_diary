@@ -8,7 +8,7 @@ import 'package:maeum_diary/domain/entity/diary_entry.dart';
 import 'package:maeum_diary/domain/port/diary_repository.dart';
 import 'package:maeum_diary/domain/value_object/emotion.dart';
 import 'package:maeum_diary/domain/value_object/emotions_selection.dart';
-import 'package:maeum_diary/presentation/provider/settings_provider.dart';
+import 'package:maeum_diary/presentation/provider/notification_settings_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class _MockDiaryRepository extends Mock implements DiaryRepository {}

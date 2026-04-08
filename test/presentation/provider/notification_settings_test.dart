@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:maeum_diary/presentation/provider/settings_provider.dart';
+import 'package:maeum_diary/presentation/provider/notification_settings_provider.dart';
 
 void main() {
     const baseTime = TimeOfDay(hour: 21, minute: 0);
