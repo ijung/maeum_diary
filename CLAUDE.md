@@ -7,7 +7,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 1. 코드는 Hexagonal Architecture를 준수하여 작성하며, Port와 Adapter의 역할을 명확히 분리한다.
 2. 하나의 클래스는 하나의 책임만 가지도록 설계한다. (SRP)
 3. 클래스가 과도한 책임을 가지지 않도록 한다.
-4. 주요 비즈니스 코드 작성 시 반드시 테스트 코드를 함께 작성한다.
+4. 주요 비즈니스 코드 등 테스트 코드가 필요한 경우 반드시 테스트 코드를 작성한다.
 5. 테스트 코드는 정상 흐름과 예외/실패 케이스를 모두 포함해야 한다.
 6. 테스트는 구현이 아닌 동작(Behavior) 중심으로 작성한다.
 7. 코드 작성 후 모든 테스트가 성공할 때까지 `flutter test`를 실행한다.
