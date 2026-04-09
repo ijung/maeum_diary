@@ -172,11 +172,12 @@ class _ThemeTile extends ConsumerWidget {
               tapTargetSize: MaterialTapTargetSize.shrinkWrap,
             ),
             segments: const [
-              ButtonSegment(value: ThemeMode.system, label: Text('시스템')),
-              ButtonSegment(value: ThemeMode.light, label: Text('라이트')),
-              ButtonSegment(value: ThemeMode.dark, label: Text('다크')),
+              ButtonSegment(value: ThemeMode.system, label: Text('시스템', maxLines: 1)),
+              ButtonSegment(value: ThemeMode.light, label: Text('라이트', maxLines: 1)),
+              ButtonSegment(value: ThemeMode.dark, label: Text('다크', maxLines: 1)),
             ],
             selected: {themeMode},
+            showSelectedIcon: false,
             expandedInsets: EdgeInsets.zero,
             onSelectionChanged: (selected) {
               ref.read(themeModeProvider.notifier).setThemeMode(selected.first);

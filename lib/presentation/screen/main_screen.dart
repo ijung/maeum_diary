@@ -48,14 +48,17 @@ class MainScreen extends ConsumerWidget {
           ),
         ],
       ),
-      body: Padding(
-        padding: const EdgeInsets.fromLTRB(12, 0, 12, 12),
-        child: Column(
-          children: [
-            const _MonthHeader(),
-            const SizedBox(height: 8),
-            Expanded(child: _CalendarCard(isDark: isDark)),
-          ],
+      body: SafeArea(
+        top: false,
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(12, 0, 12, 12),
+          child: Column(
+            children: [
+              const _MonthHeader(),
+              const SizedBox(height: 8),
+              Expanded(child: _CalendarCard(isDark: isDark)),
+            ],
+          ),
         ),
       ),
     );
