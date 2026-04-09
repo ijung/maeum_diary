@@ -34,7 +34,9 @@
       "Bash(dart mcp-server:*)",
       "Bash(echo \"exit: $?\")",
       "mcp__dart",
-      "Bash(flutter clean:*)"
+      "Bash(flutter clean:*)",
+      "Bash(git tag:*)",
+      "Bash(gh auth:*)"
     ]
   }
 }
