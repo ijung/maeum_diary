@@ -40,23 +40,43 @@ class DiaryDetailScreen extends ConsumerWidget {
           color: isDark ? colorScheme.onSurface : const Color(0xFF8D6E63),
         ),
         actions: [
-          if (canEdit)
-            diaryAsync.maybeWhen(
-              data: (entry) => entry != null
-                  ? IconButton(
-                      icon: const Icon(Icons.edit_outlined),
-                      tooltip: '수정',
-                      onPressed: () {
+          diaryAsync.maybeWhen(
+            data: (entry) => entry != null
+                ? IconButton(
+                    icon: Icon(
+                      Icons.edit_outlined,
+                      color: canEdit
+                          ? null
+                          : (isDark
+                                ? colorScheme.onSurface
+                                : const Color(0xFF8D6E63))
+                              .withValues(alpha: 0.35),
+                    ),
+                    tooltip: canEdit ? '수정' : '수정 불가',
+                    onPressed: () {
+                      if (canEdit) {
                         Navigator.of(context).pushReplacement(
                           MaterialPageRoute(
                             builder: (_) => DiaryEditScreen(date: date),
                           ),
                         );
-                      },
-                    )
-                  : const SizedBox.shrink(),
-              orElse: () => const SizedBox.shrink(),
-            ),
+                      } else {
+                        ScaffoldMessenger.of(context)
+                          ..clearSnackBars()
+                          ..showSnackBar(
+                            const SnackBar(
+                              content: Text(
+                                '작성 기간(당일~다음날 15시)이 지나 수정할 수 없어요 🥲',
+                              ),
+                              behavior: SnackBarBehavior.floating,
+                            ),
+                          );
+                      }
+                    },
+                  )
+                : const SizedBox.shrink(),
+            orElse: () => const SizedBox.shrink(),
+          ),
         ],
       ),
       body: diaryAsync.when(
