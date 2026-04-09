@@ -203,12 +203,12 @@ class _NavButton extends StatelessWidget {
 
 // ─── 캘린더 카드 (요일 헤더 + 그리드) ────────────────────────────────────────
 
-class _CalendarCard extends StatelessWidget {
+class _CalendarCard extends ConsumerWidget {
   final bool isDark;
   const _CalendarCard({required this.isDark});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final cardBg = isDark
         ? Theme.of(context).colorScheme.surfaceContainerLow
         : Colors.white.withValues(alpha: 0.9);
@@ -216,29 +216,45 @@ class _CalendarCard extends StatelessWidget {
         ? Theme.of(context).colorScheme.outline.withValues(alpha: 0.2)
         : const Color(0xFFD7C4A8);
 
-    return Container(
-      decoration: BoxDecoration(
-        color: cardBg,
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: borderColor, width: 1.5),
-        boxShadow: isDark
-            ? null
-            : [
-                BoxShadow(
-                  color: const Color(0xFF8D6E63).withValues(alpha: 0.08),
-                  blurRadius: 12,
-                  offset: const Offset(0, 4),
-                ),
-              ],
-      ),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(20),
-        child: const Column(
-          children: [
-            _WeekDayHeader(),
-            Divider(height: 1, thickness: 1),
-            Expanded(child: _CalendarGrid()),
-          ],
+    return GestureDetector(
+      onHorizontalDragEnd: (details) {
+        final velocity = details.primaryVelocity ?? 0;
+        // 오른쪽→왼쪽 스와이프: 다음 달
+        // 왼쪽→오른쪽 스와이프: 이전 달
+        if (velocity < -300) {
+          final month = ref.read(selectedMonthProvider);
+          ref.read(selectedMonthProvider.notifier).state =
+              DateTime(month.year, month.month + 1);
+        } else if (velocity > 300) {
+          final month = ref.read(selectedMonthProvider);
+          ref.read(selectedMonthProvider.notifier).state =
+              DateTime(month.year, month.month - 1);
+        }
+      },
+      child: Container(
+        decoration: BoxDecoration(
+          color: cardBg,
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(color: borderColor, width: 1.5),
+          boxShadow: isDark
+              ? null
+              : [
+                  BoxShadow(
+                    color: const Color(0xFF8D6E63).withValues(alpha: 0.08),
+                    blurRadius: 12,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
+        ),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(20),
+          child: const Column(
+            children: [
+              _WeekDayHeader(),
+              Divider(height: 1, thickness: 1),
+              Expanded(child: _CalendarGrid()),
+            ],
+          ),
         ),
       ),
     );
