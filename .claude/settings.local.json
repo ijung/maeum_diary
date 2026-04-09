@@ -36,7 +36,9 @@
       "mcp__dart",
       "Bash(flutter clean:*)",
       "Bash(git tag:*)",
-      "Bash(gh auth:*)"
+      "Bash(gh auth:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)"
     ]
   }
 }
