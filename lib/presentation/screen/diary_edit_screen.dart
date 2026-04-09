@@ -6,6 +6,8 @@ import 'package:intl/intl.dart';
 import 'package:maeum_diary/application/use_case/save_diary_use_case.dart';
 import 'package:maeum_diary/core/service/notification_service.dart';
 import 'package:maeum_diary/core/utils/date_utils.dart' as date_utils;
+import 'package:maeum_diary/domain/value_object/activities_selection.dart';
+import 'package:maeum_diary/domain/value_object/activity.dart';
 import 'package:maeum_diary/domain/value_object/emotion.dart';
 import 'package:maeum_diary/domain/value_object/emotions_selection.dart';
 import 'package:maeum_diary/presentation/provider/diary_provider.dart';
@@ -28,6 +30,8 @@ class _DiaryEditScreenState extends ConsumerState<DiaryEditScreen> {
 
   // 선택된 감정 목록 (UI 상태로만 관리)
   List<Emotion> _selectedEmotions = [];
+  // 선택된 오늘 한 일 목록 (UI 상태로만 관리)
+  List<Activity> _selectedActivities = [];
   bool _initialized = false;
 
   @override
@@ -54,6 +58,7 @@ class _DiaryEditScreenState extends ConsumerState<DiaryEditScreen> {
         if (entry != null) {
           setState(() {
             _selectedEmotions = List.of(entry.emotions.values);
+            _selectedActivities = List.of(entry.activities.values);
             _memoController.text = entry.memo ?? '';
           });
         }
@@ -118,6 +123,14 @@ class _DiaryEditScreenState extends ConsumerState<DiaryEditScreen> {
               onMaxReached: _onEmotionMaxReached,
             ),
             const SizedBox(height: 32),
+            const _SectionLabel(label: '오늘 한 일 (선택, 최대 5개)'),
+            const SizedBox(height: 12),
+            _ActivityPicker(
+              selected: _selectedActivities,
+              onToggle: _toggleActivity,
+              onMaxReached: _onActivityMaxReached,
+            ),
+            const SizedBox(height: 32),
             const _SectionLabel(label: '메모 (선택)'),
             const SizedBox(height: 12),
             _MemoField(controller: _memoController, maxLength: _maxMemoLength),
@@ -134,6 +147,30 @@ class _DiaryEditScreenState extends ConsumerState<DiaryEditScreen> {
         ),
       ),
     );
+  }
+
+  void _onActivityMaxReached() {
+    final messenger = ScaffoldMessenger.of(context);
+    messenger.clearSnackBars();
+    messenger.showSnackBar(
+      const SnackBar(
+        content: Text('오늘 한 일은 최대 5개까지 선택할 수 있어요.'),
+        behavior: SnackBarBehavior.floating,
+      ),
+    );
+  }
+
+  void _toggleActivity(Activity activity) {
+    setState(() {
+      if (_selectedActivities.contains(activity)) {
+        _selectedActivities.remove(activity);
+      } else {
+        if (_selectedActivities.length >= ActivitiesSelection.maxCount) {
+          return;
+        }
+        _selectedActivities.add(activity);
+      }
+    });
   }
 
   void _onEmotionMaxReached() {
@@ -178,6 +215,9 @@ class _DiaryEditScreenState extends ConsumerState<DiaryEditScreen> {
     final input = SaveDiaryInput(
       date: widget.date,
       emotions: selection,
+      activities: _selectedActivities.isNotEmpty
+          ? ActivitiesSelection(_selectedActivities)
+          : const ActivitiesSelection.empty(),
       memo: _memoController.text.trim().isEmpty
           ? null
           : _memoController.text.trim(),
@@ -290,6 +330,77 @@ class _EmotionPicker extends StatelessWidget {
                 const SizedBox(width: 6),
                 Text(
                   emotion.label,
+                  style: TextStyle(
+                    fontSize: 13,
+                    color: isDisabled
+                        ? colorScheme.onSurface.withValues(alpha: 0.4)
+                        : isSelected
+                        ? colorScheme.onPrimaryContainer
+                        : colorScheme.onSurface,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      }).toList(),
+    );
+  }
+}
+
+// ─── 오늘 한 일 선택기 ─────────────────────────────────────────────────────────
+
+class _ActivityPicker extends StatelessWidget {
+  final List<Activity> selected;
+  final ValueChanged<Activity> onToggle;
+  final VoidCallback onMaxReached;
+
+  const _ActivityPicker({
+    required this.selected,
+    required this.onToggle,
+    required this.onMaxReached,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final isMaxSelected = selected.length >= ActivitiesSelection.maxCount;
+    final colorScheme = Theme.of(context).colorScheme;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final unselectedBg = isDark
+        ? colorScheme.surfaceContainerHighest
+        : const Color(0xFFEDE0D4);
+    final borderColor = isDark ? colorScheme.primary : const Color(0xFF8D6E63);
+
+    return Wrap(
+      spacing: 8,
+      runSpacing: 8,
+      children: Activity.values.map((activity) {
+        final isSelected = selected.contains(activity);
+        final isDisabled = !isSelected && isMaxSelected;
+
+        return GestureDetector(
+          onTap: isDisabled ? onMaxReached : () => onToggle(activity),
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 150),
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+            decoration: BoxDecoration(
+              color: isSelected
+                  ? colorScheme.primaryContainer
+                  : isDisabled
+                  ? unselectedBg.withValues(alpha: 0.4)
+                  : unselectedBg,
+              borderRadius: BorderRadius.circular(20),
+              border: isSelected
+                  ? Border.all(color: borderColor, width: 2)
+                  : null,
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(activity.emoji, style: const TextStyle(fontSize: 22)),
+                const SizedBox(width: 6),
+                Text(
+                  activity.label,
                   style: TextStyle(
                     fontSize: 13,
                     color: isDisabled

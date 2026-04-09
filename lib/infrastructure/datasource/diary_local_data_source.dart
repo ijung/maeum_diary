@@ -7,8 +7,8 @@ import 'package:sqflite/sqflite.dart';
 /// 싱글턴 패턴으로 앱 전체에서 단일 DB 인스턴스를 공유한다.
 final class DiaryLocalDataSource implements DiaryDataSourcePort {
   static const String _dbName = 'maeum_diary.db';
-  // v2: 개발 초기 잘못된 타입으로 저장된 데이터 초기화
-  static const int _dbVersion = 2;
+  // v3: activities 컬럼 추가 (오늘 한 일)
+  static const int _dbVersion = 3;
   static const String _tableName = 'diary_entries';
 
   static DiaryLocalDataSource? _instance;
@@ -45,6 +45,7 @@ final class DiaryLocalDataSource implements DiaryDataSourcePort {
                 id         TEXT PRIMARY KEY,
                 date       TEXT NOT NULL UNIQUE,
                 emotions   TEXT NOT NULL,
+                activities TEXT NOT NULL DEFAULT '[]',
                 memo       TEXT,
                 created_at TEXT NOT NULL,
                 updated_at TEXT NOT NULL

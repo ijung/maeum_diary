@@ -2,6 +2,8 @@ import 'dart:convert';
 
 import 'package:maeum_diary/core/utils/date_utils.dart';
 import 'package:maeum_diary/domain/entity/diary_entry.dart';
+import 'package:maeum_diary/domain/value_object/activities_selection.dart';
+import 'package:maeum_diary/domain/value_object/activity.dart';
 import 'package:maeum_diary/domain/value_object/emotion.dart';
 import 'package:maeum_diary/domain/value_object/emotions_selection.dart';
 
@@ -10,6 +12,7 @@ final class DiaryEntryDto {
   final String id;
   final String date; // 'yyyy-MM-dd'
   final String emotions; // JSON: ["happy","sad"]
+  final String activities; // JSON: ["date","study"]
   final String? memo;
   final String createdAt; // ISO8601
   final String updatedAt; // ISO8601
@@ -18,6 +21,7 @@ final class DiaryEntryDto {
     required this.id,
     required this.date,
     required this.emotions,
+    required this.activities,
     this.memo,
     required this.createdAt,
     required this.updatedAt,
@@ -34,6 +38,7 @@ final class DiaryEntryDto {
       // emotions가 빈 문자열이면 jsonDecode가 FormatException을 던지므로
       // 빈 JSON 배열을 기본값으로 사용한다 (DB 버전 업그레이드로 실제로는 발생하지 않음)
       emotions: _str(map['emotions'], fallback: '[]'),
+      activities: _str(map['activities'], fallback: '[]'),
       memo: map['memo'] == null ? null : _str(map['memo']),
       createdAt: _str(map['created_at']),
       updatedAt: _str(map['updated_at']),
@@ -58,6 +63,7 @@ final class DiaryEntryDto {
       'id': id,
       'date': date,
       'emotions': emotions,
+      'activities': activities,
       'memo': memo,
       'created_at': createdAt,
       'updated_at': updatedAt,
@@ -68,10 +74,12 @@ final class DiaryEntryDto {
 
   factory DiaryEntryDto.fromDomain(DiaryEntry entry) {
     final emotionNames = entry.emotions.values.map((e) => e.name).toList();
+    final activityNames = entry.activities.values.map((a) => a.name).toList();
     return DiaryEntryDto(
       id: entry.id,
       date: toDateKey(entry.date),
       emotions: jsonEncode(emotionNames),
+      activities: jsonEncode(activityNames),
       memo: entry.memo,
       createdAt: entry.createdAt.toIso8601String(),
       updatedAt: entry.updatedAt.toIso8601String(),
@@ -89,10 +97,23 @@ final class DiaryEntryDto {
         .map((name) => Emotion.values.firstWhere((e) => e.name == name))
         .toList();
 
+    final activityNames = (jsonDecode(activities) as List)
+        .map((a) => a.toString())
+        .toList();
+    final activityList = activityNames
+        .map(
+          (name) => Activity.values.firstWhere(
+            (a) => a.name == name,
+            orElse: () => throw StateError('알 수 없는 활동: $name'),
+          ),
+        )
+        .toList();
+
     return DiaryEntry(
       id: id,
       date: _parseDate(date),
       emotions: EmotionsSelection(emotionList),
+      activities: ActivitiesSelection(activityList),
       memo: memo,
       createdAt: DateTime.parse(createdAt),
       updatedAt: DateTime.parse(updatedAt),

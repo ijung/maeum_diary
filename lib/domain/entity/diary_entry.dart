@@ -1,3 +1,4 @@
+import 'package:maeum_diary/domain/value_object/activities_selection.dart';
 import 'package:maeum_diary/domain/value_object/emotions_selection.dart';
 
 /// 하루 감정 일기를 나타내는 핵심 도메인 엔티티 (불변)
@@ -11,6 +12,9 @@ final class DiaryEntry {
   /// 선택된 감정 목록 (1~3개)
   final EmotionsSelection emotions;
 
+  /// 오늘 한 일 목록 (옵셔널, 최대 5개)
+  final ActivitiesSelection activities;
+
   /// 메모 (옵셔널, 최대 500자)
   final String? memo;
 
@@ -21,14 +25,16 @@ final class DiaryEntry {
     required this.id,
     required this.date,
     required this.emotions,
+    ActivitiesSelection? activities,
     this.memo,
     required this.createdAt,
     required this.updatedAt,
-  });
+  }) : activities = activities ?? const ActivitiesSelection.empty();
 
   /// 변경된 필드만 교체한 새 [DiaryEntry]를 반환한다.
   DiaryEntry copyWith({
     EmotionsSelection? emotions,
+    ActivitiesSelection? activities,
     String? memo,
     DateTime? updatedAt,
     bool clearMemo = false,
@@ -37,6 +43,7 @@ final class DiaryEntry {
       id: id,
       date: date,
       emotions: emotions ?? this.emotions,
+      activities: activities ?? this.activities,
       memo: clearMemo ? null : (memo ?? this.memo),
       createdAt: createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
@@ -54,5 +61,5 @@ final class DiaryEntry {
 
   @override
   String toString() =>
-      'DiaryEntry(id: $id, date: $date, emotions: $emotions, memo: $memo)';
+      'DiaryEntry(id: $id, date: $date, emotions: $emotions, activities: $activities, memo: $memo)';
 }

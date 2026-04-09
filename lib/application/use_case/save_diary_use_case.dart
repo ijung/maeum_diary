@@ -2,6 +2,7 @@ import 'package:maeum_diary/core/error/failures.dart';
 import 'package:maeum_diary/core/utils/date_utils.dart';
 import 'package:maeum_diary/domain/entity/diary_entry.dart';
 import 'package:maeum_diary/domain/port/diary_repository.dart';
+import 'package:maeum_diary/domain/value_object/activities_selection.dart';
 import 'package:maeum_diary/domain/value_object/emotions_selection.dart';
 import 'package:uuid/uuid.dart';
 
@@ -9,9 +10,15 @@ import 'package:uuid/uuid.dart';
 final class SaveDiaryInput {
   final DateTime date;
   final EmotionsSelection emotions;
+  final ActivitiesSelection activities;
   final String? memo;
 
-  const SaveDiaryInput({required this.date, required this.emotions, this.memo});
+  const SaveDiaryInput({
+    required this.date,
+    required this.emotions,
+    ActivitiesSelection? activities,
+    this.memo,
+  }) : activities = activities ?? const ActivitiesSelection.empty();
 }
 
 /// 일기 저장 또는 수정을 처리하는 UseCase
@@ -64,6 +71,7 @@ final class SaveDiaryUseCase {
         id: _uuid.v4(),
         date: toLocalDate(input.date),
         emotions: input.emotions,
+        activities: input.activities,
         memo: (trimmedMemo?.isEmpty ?? true) ? null : trimmedMemo,
         createdAt: now,
         updatedAt: now,
@@ -73,6 +81,7 @@ final class SaveDiaryUseCase {
       // 기존 수정
       final updated = existing.copyWith(
         emotions: input.emotions,
+        activities: input.activities,
         memo: (trimmedMemo?.isEmpty ?? true) ? null : trimmedMemo,
         clearMemo: trimmedMemo == null || trimmedMemo.isEmpty,
         updatedAt: now,

@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:maeum_diary/core/utils/date_utils.dart';
 import 'package:maeum_diary/domain/entity/diary_entry.dart';
+import 'package:maeum_diary/domain/value_object/activity.dart';
 import 'package:maeum_diary/domain/value_object/emotion.dart';
 import 'package:maeum_diary/presentation/provider/diary_provider.dart';
 import 'package:maeum_diary/presentation/screen/diary_edit_screen.dart';
@@ -124,6 +125,12 @@ class DiaryDetailScreen extends ConsumerWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       _EmotionsDisplay(emotions: entry.emotions.values),
+                      if (entry.activities.values.isNotEmpty) ...[
+                        const SizedBox(height: 24),
+                        _ActivitiesDisplay(
+                          activities: entry.activities.values,
+                        ),
+                      ],
                       if (entry.memo != null && entry.memo!.isNotEmpty) ...[
                         const SizedBox(height: 28),
                         _MemoDisplay(memo: entry.memo!),
@@ -184,6 +191,53 @@ class _EmotionsDisplay extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+}
+
+// ─── 오늘 한 일 표시 ──────────────────────────────────────────────────────────
+
+class _ActivitiesDisplay extends StatelessWidget {
+  final List<Activity> activities;
+
+  const _ActivitiesDisplay({required this.activities});
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final colorScheme = Theme.of(context).colorScheme;
+    final labelColor = isDark ? colorScheme.primary : const Color(0xFF8D6E63);
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          '오늘 한 일',
+          style: TextStyle(
+            fontSize: 13,
+            fontWeight: FontWeight.w700,
+            color: labelColor,
+            letterSpacing: 0.3,
+          ),
+        ),
+        const SizedBox(height: 10),
+        Wrap(
+          alignment: WrapAlignment.start,
+          spacing: 8,
+          runSpacing: 8,
+          children: activities
+              .map(
+                (a) => Chip(
+                  avatar: Text(a.emoji, style: const TextStyle(fontSize: 16)),
+                  label: Text(a.label),
+                  backgroundColor: colorScheme.secondaryContainer,
+                  labelStyle: TextStyle(color: colorScheme.onSecondaryContainer),
+                  padding: const EdgeInsets.symmetric(horizontal: 4),
+                ),
+              )
+              .toList(),
+        ),
+      ],
     );
   }
 }

@@ -2,6 +2,8 @@ import 'dart:convert';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:maeum_diary/domain/entity/diary_entry.dart';
+import 'package:maeum_diary/domain/value_object/activities_selection.dart';
+import 'package:maeum_diary/domain/value_object/activity.dart';
 import 'package:maeum_diary/domain/value_object/emotion.dart';
 import 'package:maeum_diary/domain/value_object/emotions_selection.dart';
 import 'package:maeum_diary/infrastructure/dto/diary_entry_dto.dart';
@@ -12,6 +14,7 @@ void main() {
     'id': 'test-uuid',
     'date': '2024-06-15',
     'emotions': '["happy","sad"]',
+    'activities': '[]',
     'memo': '오늘 메모',
     'created_at': '2024-06-15T10:00:00.000',
     'updated_at': '2024-06-15T11:00:00.000',
@@ -33,9 +36,19 @@ void main() {
       expect(dto.id, 'test-uuid');
       expect(dto.date, '2024-06-15');
       expect(dto.emotions, '["happy","sad"]');
+      expect(dto.activities, '[]');
       expect(dto.memo, '오늘 메모');
       expect(dto.createdAt, '2024-06-15T10:00:00.000');
       expect(dto.updatedAt, '2024-06-15T11:00:00.000');
+    });
+
+    test('activities 컬럼이 없으면 빈 JSON 배열([])을 기본값으로 사용한다', () {
+      final mapWithoutActivities = Map<String, dynamic>.from(baseMap)
+        ..remove('activities');
+
+      final dto = DiaryEntryDto.fromMap(mapWithoutActivities);
+
+      expect(dto.activities, '[]');
     });
 
     test('memo가 null이면 DTO의 memo도 null이다', () {
@@ -75,6 +88,7 @@ void main() {
       expect(map['id'], 'test-uuid');
       expect(map['date'], '2024-06-15');
       expect(map['emotions'], '["happy","sad"]');
+      expect(map['activities'], '[]');
       expect(map['memo'], '오늘 메모');
       expect(map['created_at'], '2024-06-15T10:00:00.000');
       expect(map['updated_at'], '2024-06-15T11:00:00.000');
@@ -112,6 +126,29 @@ void main() {
 
       final decoded = jsonDecode(dto.emotions) as List;
       expect(decoded, ['happy', 'sad']);
+    });
+
+    test('활동 목록을 JSON 배열로 직렬화한다', () {
+      final entryWithActivities = DiaryEntry(
+        id: 'activity-uuid',
+        date: DateTime(2024, 6, 15),
+        emotions: EmotionsSelection([Emotion.happy]),
+        activities: ActivitiesSelection([Activity.study, Activity.exercise]),
+        createdAt: DateTime(2024, 6, 15, 10, 0),
+        updatedAt: DateTime(2024, 6, 15, 10, 0),
+      );
+
+      final dto = DiaryEntryDto.fromDomain(entryWithActivities);
+      final decoded = jsonDecode(dto.activities) as List;
+
+      expect(decoded, ['study', 'exercise']);
+    });
+
+    test('활동이 없으면 빈 JSON 배열로 직렬화한다', () {
+      final dto = DiaryEntryDto.fromDomain(baseEntity);
+      final decoded = jsonDecode(dto.activities) as List;
+
+      expect(decoded, isEmpty);
     });
 
     test('memo가 null인 엔티티를 변환하면 DTO의 memo도 null이다', () {
@@ -163,6 +200,24 @@ void main() {
       expect(entry.emotions.values, [Emotion.happy, Emotion.sad]);
     });
 
+    test('JSON 배열의 활동 목록을 ActivitiesSelection으로 역직렬화한다', () {
+      final mapWithActivities = Map<String, dynamic>.from(baseMap)
+        ..['activities'] = '["study","exercise"]';
+      final dto = DiaryEntryDto.fromMap(mapWithActivities);
+
+      final entry = dto.toDomain();
+
+      expect(entry.activities.values, [Activity.study, Activity.exercise]);
+    });
+
+    test('활동 목록이 빈 배열이면 ActivitiesSelection이 비어있다', () {
+      final dto = DiaryEntryDto.fromMap(baseMap);
+
+      final entry = dto.toDomain();
+
+      expect(entry.activities.isEmpty, isTrue);
+    });
+
     test('memo가 null인 DTO를 변환하면 엔티티의 memo도 null이다', () {
       final map = Map<String, dynamic>.from(baseMap)..['memo'] = null;
       final dto = DiaryEntryDto.fromMap(map);
@@ -181,7 +236,23 @@ void main() {
       expect(restored.id, baseEntity.id);
       expect(restored.date, baseEntity.date);
       expect(restored.emotions, baseEntity.emotions);
+      expect(restored.activities, baseEntity.activities);
       expect(restored.memo, baseEntity.memo);
+    });
+
+    test('활동 목록이 있어도 왕복 변환이 정확하다', () {
+      final entryWithActivities = DiaryEntry(
+        id: 'activity-id',
+        date: DateTime(2024, 6, 15),
+        emotions: EmotionsSelection([Emotion.happy]),
+        activities: ActivitiesSelection([Activity.study, Activity.date]),
+        createdAt: DateTime(2024, 6, 15, 10, 0),
+        updatedAt: DateTime(2024, 6, 15, 10, 0),
+      );
+
+      final restored = DiaryEntryDto.fromDomain(entryWithActivities).toDomain();
+
+      expect(restored.activities.values, [Activity.study, Activity.date]);
     });
 
     test('memo가 null인 경우에도 왕복 변환이 정확하다', () {
