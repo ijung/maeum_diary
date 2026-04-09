@@ -12,6 +12,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 6. 테스트는 구현이 아닌 동작(Behavior) 중심으로 작성한다.
 7. 코드 작성 후 모든 테스트가 성공할 때까지 `flutter test`를 실행한다.
 8. 코드 작성 후 lint 경고가 없을 때까지 `flutter analyze`를 실행한다.
+9. 언제나 `dart mcp`를 사용한다.
 
 ## 개발 명령어
 

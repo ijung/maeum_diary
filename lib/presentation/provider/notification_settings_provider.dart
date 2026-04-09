@@ -9,27 +9,27 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 /// 알림 설정 모델
 class NotificationSettings {
-    final bool enabled;
-    final TimeOfDay time;
-    final bool alwaysNotify;
+  final bool enabled;
+  final TimeOfDay time;
+  final bool alwaysNotify;
 
-    const NotificationSettings({
-        required this.enabled,
-        required this.time,
-        required this.alwaysNotify,
-    });
+  const NotificationSettings({
+    required this.enabled,
+    required this.time,
+    required this.alwaysNotify,
+  });
 
-    NotificationSettings copyWith({
-        bool? enabled,
-        TimeOfDay? time,
-        bool? alwaysNotify,
-    }) {
-        return NotificationSettings(
-            enabled: enabled ?? this.enabled,
-            time: time ?? this.time,
-            alwaysNotify: alwaysNotify ?? this.alwaysNotify,
-        );
-    }
+  NotificationSettings copyWith({
+    bool? enabled,
+    TimeOfDay? time,
+    bool? alwaysNotify,
+  }) {
+    return NotificationSettings(
+      enabled: enabled ?? this.enabled,
+      time: time ?? this.time,
+      alwaysNotify: alwaysNotify ?? this.alwaysNotify,
+    );
+  }
 }
 
 // ─── 알림 설정 상태 관리 ───────────────────────────────────────────────────────
@@ -40,111 +40,114 @@ class NotificationSettings {
 /// 설정 변경 시 NotificationService를 통해 즉시 재스케줄링한다.
 final class NotificationSettingsNotifier
     extends AsyncNotifier<NotificationSettings> {
-    static const String _enabledKey = 'notif_enabled';
-    static const String _hourKey = 'notif_hour';
-    static const String _minuteKey = 'notif_minute';
-    static const String _alwaysNotifyKey = 'notif_always_notify';
+  static const String _enabledKey = 'notif_enabled';
+  static const String _hourKey = 'notif_hour';
+  static const String _minuteKey = 'notif_minute';
+  static const String _alwaysNotifyKey = 'notif_always_notify';
 
-    // 기본 알림 시각: 21:00
-    static const int _defaultHour = 21;
-    static const int _defaultMinute = 0;
+  // 기본 알림 시각: 21:00
+  static const int _defaultHour = 21;
+  static const int _defaultMinute = 0;
 
-    @override
-    Future<NotificationSettings> build() async {
-        final prefs = await SharedPreferences.getInstance();
-        return NotificationSettings(
-            enabled: prefs.getBool(_enabledKey) ?? false,
-            time: TimeOfDay(
-                hour: prefs.getInt(_hourKey) ?? _defaultHour,
-                minute: prefs.getInt(_minuteKey) ?? _defaultMinute,
-            ),
-            alwaysNotify: prefs.getBool(_alwaysNotifyKey) ?? false,
+  @override
+  Future<NotificationSettings> build() async {
+    final prefs = await SharedPreferences.getInstance();
+    return NotificationSettings(
+      enabled: prefs.getBool(_enabledKey) ?? false,
+      time: TimeOfDay(
+        hour: prefs.getInt(_hourKey) ?? _defaultHour,
+        minute: prefs.getInt(_minuteKey) ?? _defaultMinute,
+      ),
+      alwaysNotify: prefs.getBool(_alwaysNotifyKey) ?? false,
+    );
+  }
+
+  Future<void> setEnabled(bool enabled) async {
+    final current = state.value;
+    if (current == null) return;
+
+    // 알림 활성화 시 권한 요청 — 거부되면 상태 변경 없이 종료
+    if (enabled) {
+      final granted = await NotificationService.instance.requestPermission();
+      if (!granted) return;
+    }
+
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(_enabledKey, enabled);
+
+    final next = current.copyWith(enabled: enabled);
+    state = AsyncData(next);
+
+    try {
+      final skipToday =
+          enabled && !current.alwaysNotify && await _hasDiaryToday();
+      await NotificationService.instance.reschedule(
+        enabled: enabled,
+        time: next.time,
+        skipToday: skipToday,
+      );
+    } catch (_) {
+      // 스케줄링 실패 시 저장된 설정을 원래대로 롤백
+      await prefs.setBool(_enabledKey, current.enabled);
+      state = AsyncData(current);
+      rethrow;
+    }
+  }
+
+  Future<void> setAlwaysNotify(bool value) async {
+    final current = state.value;
+    if (current == null) return;
+
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(_alwaysNotifyKey, value);
+    state = AsyncData(current.copyWith(alwaysNotify: value));
+
+    // alwaysNotify를 끄면 오늘 일기 작성 여부에 따라 알림 재스케줄
+    // (일기를 이미 썼다면 오늘 알림을 건너뜀)
+    if (!value && current.enabled) {
+      try {
+        await NotificationService.instance.rescheduleFromPrefs(
+          hasDiaryToday: await _hasDiaryToday(),
         );
+      } catch (e, st) {
+        debugPrint('[NotificationService] alwaysNotify 변경 후 재스케줄링 실패: $e\n$st');
+      }
     }
+  }
 
-    Future<void> setEnabled(bool enabled) async {
-        final current = state.valueOrNull;
-        if (current == null) return;
+  Future<void> setTime(TimeOfDay time) async {
+    final current = state.value;
+    if (current == null) return;
 
-        // 알림 활성화 시 권한 요청 — 거부되면 상태 변경 없이 종료
-        if (enabled) {
-            final granted = await NotificationService.instance.requestPermission();
-            if (!granted) return;
-        }
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setInt(_hourKey, time.hour);
+    await prefs.setInt(_minuteKey, time.minute);
 
-        final prefs = await SharedPreferences.getInstance();
-        await prefs.setBool(_enabledKey, enabled);
+    // 시간 설정은 스케줄링 성공 여부와 무관하게 즉시 반영
+    state = AsyncData(current.copyWith(time: time));
 
-        final next = current.copyWith(enabled: enabled);
-        state = AsyncData(next);
-
-        try {
-            final skipToday = enabled && !current.alwaysNotify && await _hasDiaryToday();
-            await NotificationService.instance.reschedule(
-                enabled: enabled,
-                time: next.time,
-                skipToday: skipToday,
-            );
-        } catch (_) {
-            // 스케줄링 실패 시 저장된 설정을 원래대로 롤백
-            await prefs.setBool(_enabledKey, current.enabled);
-            state = AsyncData(current);
-            rethrow;
-        }
+    try {
+      final skipToday =
+          current.enabled && !current.alwaysNotify && await _hasDiaryToday();
+      await NotificationService.instance.reschedule(
+        enabled: current.enabled,
+        time: time,
+        skipToday: skipToday,
+      );
+    } catch (e, st) {
+      debugPrint('[NotificationService] 알림 시간 변경 후 재스케줄링 실패: $e\n$st');
     }
+  }
 
-    Future<void> setAlwaysNotify(bool value) async {
-        final current = state.valueOrNull;
-        if (current == null) return;
-
-        final prefs = await SharedPreferences.getInstance();
-        await prefs.setBool(_alwaysNotifyKey, value);
-        state = AsyncData(current.copyWith(alwaysNotify: value));
-
-        // alwaysNotify를 끄면 오늘 일기 작성 여부에 따라 알림 재스케줄
-        // (일기를 이미 썼다면 오늘 알림을 건너뜀)
-        if (!value && current.enabled) {
-            try {
-                await NotificationService.instance.rescheduleFromPrefs(
-                    hasDiaryToday: await _hasDiaryToday(),
-                );
-            } catch (e, st) {
-                debugPrint('[NotificationService] alwaysNotify 변경 후 재스케줄링 실패: $e\n$st');
-            }
-        }
-    }
-
-    Future<void> setTime(TimeOfDay time) async {
-        final current = state.valueOrNull;
-        if (current == null) return;
-
-        final prefs = await SharedPreferences.getInstance();
-        await prefs.setInt(_hourKey, time.hour);
-        await prefs.setInt(_minuteKey, time.minute);
-
-        // 시간 설정은 스케줄링 성공 여부와 무관하게 즉시 반영
-        state = AsyncData(current.copyWith(time: time));
-
-        try {
-            final skipToday = current.enabled && !current.alwaysNotify && await _hasDiaryToday();
-            await NotificationService.instance.reschedule(
-                enabled: current.enabled,
-                time: time,
-                skipToday: skipToday,
-            );
-        } catch (e, st) {
-            debugPrint('[NotificationService] 알림 시간 변경 후 재스케줄링 실패: $e\n$st');
-        }
-    }
-
-    /// 오늘 일기 존재 여부를 DB에서 조회한다.
-    Future<bool> _hasDiaryToday() async {
-        final today = date_utils.toLocalDate(DateTime.now());
-        final entry = await ref.read(getDiaryByDateUseCaseProvider).execute(today);
-        return entry != null;
-    }
+  /// 오늘 일기 존재 여부를 DB에서 조회한다.
+  Future<bool> _hasDiaryToday() async {
+    final today = date_utils.toLocalDate(DateTime.now());
+    final entry = await ref.read(getDiaryByDateUseCaseProvider).execute(today);
+    return entry != null;
+  }
 }
 
 final notificationSettingsProvider =
     AsyncNotifierProvider<NotificationSettingsNotifier, NotificationSettings>(
-        NotificationSettingsNotifier.new);
+      NotificationSettingsNotifier.new,
+    );

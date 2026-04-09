@@ -11,496 +11,494 @@ import 'package:maeum_diary/presentation/screen/settings_screen.dart';
 
 /// 앱의 메인 화면 — 월 캘린더
 class MainScreen extends ConsumerWidget {
-    const MainScreen({super.key});
+  const MainScreen({super.key});
 
-    @override
-    Widget build(BuildContext context, WidgetRef ref) {
-        final colorScheme = Theme.of(context).colorScheme;
-        final isDark = Theme.of(context).brightness == Brightness.dark;
-        final bgColor = isDark
-            ? colorScheme.surface
-            : const Color(0xFFF5F0E8);
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final bgColor = isDark ? colorScheme.surface : const Color(0xFFF5F0E8);
 
-        return Scaffold(
-            backgroundColor: bgColor,
-            appBar: AppBar(
-                backgroundColor: bgColor,
-                surfaceTintColor: Colors.transparent,
-                elevation: 0,
-                title: Text(
-                    '마음 일기',
-                    style: TextStyle(
-                        fontWeight: FontWeight.w800,
-                        fontSize: 22,
-                        color: isDark ? colorScheme.onSurface : const Color(0xFF5C4033),
-                        letterSpacing: 1.5,
-                    ),
-                ),
-                centerTitle: true,
-                actions: [
-                    IconButton(
-                        icon: Icon(
-                            Icons.settings_outlined,
-                            color: isDark ? colorScheme.onSurface : const Color(0xFF8D6E63),
-                        ),
-                        tooltip: '설정',
-                        onPressed: () => Navigator.of(context).push(
-                            MaterialPageRoute(
-                                builder: (_) => const SettingsScreen(),
-                            ),
-                        ),
-                    ),
-                ],
+    return Scaffold(
+      backgroundColor: bgColor,
+      appBar: AppBar(
+        backgroundColor: bgColor,
+        surfaceTintColor: Colors.transparent,
+        elevation: 0,
+        title: Text(
+          '마음 일기',
+          style: TextStyle(
+            fontWeight: FontWeight.w800,
+            fontSize: 22,
+            color: isDark ? colorScheme.onSurface : const Color(0xFF5C4033),
+            letterSpacing: 1.5,
+          ),
+        ),
+        centerTitle: true,
+        actions: [
+          IconButton(
+            icon: Icon(
+              Icons.settings_outlined,
+              color: isDark ? colorScheme.onSurface : const Color(0xFF8D6E63),
             ),
-            body: Padding(
-                padding: const EdgeInsets.fromLTRB(12, 0, 12, 12),
-                child: Column(
-                    children: [
-                        const _MonthHeader(),
-                        const SizedBox(height: 8),
-                        Expanded(
-                            child: _CalendarCard(isDark: isDark),
-                        ),
-                    ],
-                ),
-            ),
-        );
-    }
+            tooltip: '설정',
+            onPressed: () => Navigator.of(
+              context,
+            ).push(MaterialPageRoute(builder: (_) => const SettingsScreen())),
+          ),
+        ],
+      ),
+      body: Padding(
+        padding: const EdgeInsets.fromLTRB(12, 0, 12, 12),
+        child: Column(
+          children: [
+            const _MonthHeader(),
+            const SizedBox(height: 8),
+            Expanded(child: _CalendarCard(isDark: isDark)),
+          ],
+        ),
+      ),
+    );
+  }
 }
 
 // ─── 월 헤더 (이전 달 / 2024년 4월 / 다음 달) ─────────────────────────────────
 
 class _MonthHeader extends ConsumerWidget {
-    const _MonthHeader();
+  const _MonthHeader();
 
-    @override
-    Widget build(BuildContext context, WidgetRef ref) {
-        final month = ref.watch(selectedMonthProvider);
-        final label = DateFormat('yyyy년 M월', 'ko').format(month);
-        final isDark = Theme.of(context).brightness == Brightness.dark;
-        final buttonBg = isDark
-            ? Theme.of(context).colorScheme.surfaceContainerHighest
-            : const Color(0xFFEDE0D4);
-        final buttonFg = isDark
-            ? Theme.of(context).colorScheme.onSurface
-            : const Color(0xFF6D4C41);
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final month = ref.watch(selectedMonthProvider);
+    final label = DateFormat('yyyy년 M월', 'ko').format(month);
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final buttonBg = isDark
+        ? Theme.of(context).colorScheme.surfaceContainerHighest
+        : const Color(0xFFEDE0D4);
+    final buttonFg = isDark
+        ? Theme.of(context).colorScheme.onSurface
+        : const Color(0xFF6D4C41);
 
-        return Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 8),
-            child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                    // 이전 달 버튼
-                    _NavButton(
-                        label: '이전 달',
-                        icon: Icons.chevron_left,
-                        bg: buttonBg,
-                        fg: buttonFg,
-                        onTap: () {
-                            ref.read(selectedMonthProvider.notifier).state =
-                                DateTime(month.year, month.month - 1);
-                        },
-                    ),
-                    // 월 표시
-                    Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                            const Text(
-                                '🐾',
-                                style: TextStyle(fontSize: 14),
-                            ),
-                            const SizedBox(width: 6),
-                            Text(
-                                label,
-                                style: TextStyle(
-                                    fontSize: 17,
-                                    fontWeight: FontWeight.w700,
-                                    color: isDark
-                                        ? Theme.of(context).colorScheme.onSurface
-                                        : const Color(0xFF5C4033),
-                                ),
-                            ),
-                            const SizedBox(width: 6),
-                            const Text(
-                                '🐾',
-                                style: TextStyle(fontSize: 14),
-                            ),
-                        ],
-                    ),
-                    // 다음 달 버튼
-                    _NavButton(
-                        label: '다음 달',
-                        icon: Icons.chevron_right,
-                        iconLeading: false,
-                        bg: buttonBg,
-                        fg: buttonFg,
-                        onTap: () {
-                            ref.read(selectedMonthProvider.notifier).state =
-                                DateTime(month.year, month.month + 1);
-                        },
-                    ),
-                ],
-            ),
-        );
-    }
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 8),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          // 이전 달 버튼
+          _NavButton(
+            label: '이전 달',
+            icon: Icons.chevron_left,
+            bg: buttonBg,
+            fg: buttonFg,
+            onTap: () {
+              ref.read(selectedMonthProvider.notifier).state = DateTime(
+                month.year,
+                month.month - 1,
+              );
+            },
+          ),
+          // 월 표시
+          Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Text('🐾', style: TextStyle(fontSize: 14)),
+              const SizedBox(width: 6),
+              Text(
+                label,
+                style: TextStyle(
+                  fontSize: 17,
+                  fontWeight: FontWeight.w700,
+                  color: isDark
+                      ? Theme.of(context).colorScheme.onSurface
+                      : const Color(0xFF5C4033),
+                ),
+              ),
+              const SizedBox(width: 6),
+              const Text('🐾', style: TextStyle(fontSize: 14)),
+            ],
+          ),
+          // 다음 달 버튼
+          _NavButton(
+            label: '다음 달',
+            icon: Icons.chevron_right,
+            iconLeading: false,
+            bg: buttonBg,
+            fg: buttonFg,
+            onTap: () {
+              ref.read(selectedMonthProvider.notifier).state = DateTime(
+                month.year,
+                month.month + 1,
+              );
+            },
+          ),
+        ],
+      ),
+    );
+  }
 }
 
 /// 이전/다음 달 pill 버튼
 class _NavButton extends StatelessWidget {
-    final String label;
-    final IconData icon;
-    final bool iconLeading;
-    final Color bg;
-    final Color fg;
-    final VoidCallback onTap;
+  final String label;
+  final IconData icon;
+  final bool iconLeading;
+  final Color bg;
+  final Color fg;
+  final VoidCallback onTap;
 
-    const _NavButton({
-        required this.label,
-        required this.icon,
-        required this.bg,
-        required this.fg,
-        required this.onTap,
-        this.iconLeading = true,
-    });
+  const _NavButton({
+    required this.label,
+    required this.icon,
+    required this.bg,
+    required this.fg,
+    required this.onTap,
+    this.iconLeading = true,
+  });
 
-    @override
-    Widget build(BuildContext context) {
-        return GestureDetector(
-            onTap: onTap,
-            child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
-                decoration: BoxDecoration(
-                    color: bg,
-                    borderRadius: BorderRadius.circular(20),
-                ),
-                child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: iconLeading
-                        ? [
-                            Icon(icon, size: 16, color: fg),
-                            const SizedBox(width: 3),
-                            Text(label, style: TextStyle(fontSize: 12, color: fg, fontWeight: FontWeight.w600)),
-                          ]
-                        : [
-                            Text(label, style: TextStyle(fontSize: 12, color: fg, fontWeight: FontWeight.w600)),
-                            const SizedBox(width: 3),
-                            Icon(icon, size: 16, color: fg),
-                          ],
-                ),
-            ),
-        );
-    }
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
+        decoration: BoxDecoration(
+          color: bg,
+          borderRadius: BorderRadius.circular(20),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: iconLeading
+              ? [
+                  Icon(icon, size: 16, color: fg),
+                  const SizedBox(width: 3),
+                  Text(
+                    label,
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: fg,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ]
+              : [
+                  Text(
+                    label,
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: fg,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  const SizedBox(width: 3),
+                  Icon(icon, size: 16, color: fg),
+                ],
+        ),
+      ),
+    );
+  }
 }
 
 // ─── 캘린더 카드 (요일 헤더 + 그리드) ────────────────────────────────────────
 
 class _CalendarCard extends StatelessWidget {
-    final bool isDark;
-    const _CalendarCard({required this.isDark});
+  final bool isDark;
+  const _CalendarCard({required this.isDark});
 
-    @override
-    Widget build(BuildContext context) {
-        final cardBg = isDark
-            ? Theme.of(context).colorScheme.surfaceContainerLow
-            : Colors.white.withValues(alpha: 0.9);
-        final borderColor = isDark
-            ? Theme.of(context).colorScheme.outline.withValues(alpha: 0.2)
-            : const Color(0xFFD7C4A8);
+  @override
+  Widget build(BuildContext context) {
+    final cardBg = isDark
+        ? Theme.of(context).colorScheme.surfaceContainerLow
+        : Colors.white.withValues(alpha: 0.9);
+    final borderColor = isDark
+        ? Theme.of(context).colorScheme.outline.withValues(alpha: 0.2)
+        : const Color(0xFFD7C4A8);
 
-        return Container(
-            decoration: BoxDecoration(
-                color: cardBg,
-                borderRadius: BorderRadius.circular(20),
-                border: Border.all(color: borderColor, width: 1.5),
-                boxShadow: isDark
-                    ? null
-                    : [
-                        BoxShadow(
-                            color: const Color(0xFF8D6E63).withValues(alpha: 0.08),
-                            blurRadius: 12,
-                            offset: const Offset(0, 4),
-                        ),
-                      ],
-            ),
-            child: ClipRRect(
-                borderRadius: BorderRadius.circular(20),
-                child: const Column(
-                    children: [
-                        _WeekDayHeader(),
-                        Divider(height: 1, thickness: 1),
-                        Expanded(child: _CalendarGrid()),
-                    ],
+    return Container(
+      decoration: BoxDecoration(
+        color: cardBg,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: borderColor, width: 1.5),
+        boxShadow: isDark
+            ? null
+            : [
+                BoxShadow(
+                  color: const Color(0xFF8D6E63).withValues(alpha: 0.08),
+                  blurRadius: 12,
+                  offset: const Offset(0, 4),
                 ),
-            ),
-        );
-    }
+              ],
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(20),
+        child: const Column(
+          children: [
+            _WeekDayHeader(),
+            Divider(height: 1, thickness: 1),
+            Expanded(child: _CalendarGrid()),
+          ],
+        ),
+      ),
+    );
+  }
 }
 
 // ─── 요일 헤더 (일 월 화 수 목 금 토) ─────────────────────────────────────────
 
 class _WeekDayHeader extends StatelessWidget {
-    const _WeekDayHeader();
+  const _WeekDayHeader();
 
-    // 월요일 시작
-    static const _labels = ['월', '화', '수', '목', '금', '토', '일'];
+  // 월요일 시작
+  static const _labels = ['월', '화', '수', '목', '금', '토', '일'];
 
-    @override
-    Widget build(BuildContext context) {
-        final isDark = Theme.of(context).brightness == Brightness.dark;
-        final headerBg = isDark
-            ? Theme.of(context).colorScheme.surfaceContainerHigh
-            : const Color(0xFFF0E6D8);
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final headerBg = isDark
+        ? Theme.of(context).colorScheme.surfaceContainerHigh
+        : const Color(0xFFF0E6D8);
 
-        return Container(
-            color: headerBg,
-            padding: const EdgeInsets.symmetric(vertical: 10),
-            child: Row(
-                children: _labels.asMap().entries.map((e) {
-                    final label = e.value;
-                    Color textColor;
-                    if (label == '일') {
-                        textColor = Colors.red.shade400;
-                    } else if (label == '토') {
-                        textColor = Colors.blue.shade400;
-                    } else {
-                        textColor = isDark
-                            ? Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.7)
-                            : const Color(0xFF6D4C41).withValues(alpha: 0.8);
-                    }
-                    return Expanded(
-                        child: Center(
-                            child: Text(
-                                label,
-                                style: TextStyle(
-                                    fontSize: 13,
-                                    fontWeight: FontWeight.w700,
-                                    color: textColor,
-                                ),
-                            ),
-                        ),
-                    );
-                }).toList(),
+    return Container(
+      color: headerBg,
+      padding: const EdgeInsets.symmetric(vertical: 10),
+      child: Row(
+        children: _labels.asMap().entries.map((e) {
+          final label = e.value;
+          Color textColor;
+          if (label == '일') {
+            textColor = Colors.red.shade400;
+          } else if (label == '토') {
+            textColor = Colors.blue.shade400;
+          } else {
+            textColor = isDark
+                ? Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.7)
+                : const Color(0xFF6D4C41).withValues(alpha: 0.8);
+          }
+          return Expanded(
+            child: Center(
+              child: Text(
+                label,
+                style: TextStyle(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w700,
+                  color: textColor,
+                ),
+              ),
             ),
-        );
-    }
+          );
+        }).toList(),
+      ),
+    );
+  }
 }
 
 // ─── 캘린더 그리드 ─────────────────────────────────────────────────────────────
 
 class _CalendarGrid extends ConsumerWidget {
-    const _CalendarGrid();
+  const _CalendarGrid();
 
-    @override
-    Widget build(BuildContext context, WidgetRef ref) {
-        final month = ref.watch(selectedMonthProvider);
-        final selectedDate = ref.watch(selectedDateProvider);
-        final diaryAsync = ref.watch(monthlyDiaryProvider);
-        final holidays = ref.watch(holidayProvider(month.year)).valueOrNull ?? {};
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final month = ref.watch(selectedMonthProvider);
+    final selectedDate = ref.watch(selectedDateProvider);
+    final diaryAsync = ref.watch(monthlyDiaryProvider);
+    final holidays = ref.watch(holidayProvider(month.year)).value ?? {};
 
-        // 해당 월의 첫 날
-        final firstDay = DateTime(month.year, month.month, 1);
-        // 월요일 기준 offset (월=0, 화=1, ..., 일=6)
-        final offset = (firstDay.weekday - 1) % 7;
-        // 해당 월의 마지막 날
-        final lastDay = DateTime(month.year, month.month + 1, 0);
+    // 해당 월의 첫 날
+    final firstDay = DateTime(month.year, month.month, 1);
+    // 월요일 기준 offset (월=0, 화=1, ..., 일=6)
+    final offset = (firstDay.weekday - 1) % 7;
+    // 해당 월의 마지막 날
+    final lastDay = DateTime(month.year, month.month + 1, 0);
 
-        final today = date_utils.toLocalDate(DateTime.now());
+    final today = date_utils.toLocalDate(DateTime.now());
 
-        return diaryAsync.when(
-            loading: () => const Center(child: CircularProgressIndicator()),
-            error: (e, _) => Center(child: Text('오류: $e')),
-            data: (diaryMap) {
-                final totalCells = offset + lastDay.day;
-                final rows = (totalCells / 7).ceil();
+    return diaryAsync.when(
+      loading: () => const Center(child: CircularProgressIndicator()),
+      error: (e, _) => Center(child: Text('오류: $e')),
+      data: (diaryMap) {
+        final totalCells = offset + lastDay.day;
+        final rows = (totalCells / 7).ceil();
 
-                // LayoutBuilder로 실제 높이를 얻어 행 높이를 동적으로 결정
-                return LayoutBuilder(
-                    builder: (context, constraints) {
-                        final rowHeight = constraints.maxHeight / rows;
+        // LayoutBuilder로 실제 높이를 얻어 행 높이를 동적으로 결정
+        return LayoutBuilder(
+          builder: (context, constraints) {
+            final rowHeight = constraints.maxHeight / rows;
 
-                        return Column(
-                            children: List.generate(rows, (rowIndex) {
-                                return SizedBox(
-                                    height: rowHeight,
-                                    child: Row(
-                                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                                        children: List.generate(7, (colIndex) {
-                                            final index = rowIndex * 7 + colIndex;
-                                            final dayNumber = index - offset + 1;
+            return Column(
+              children: List.generate(rows, (rowIndex) {
+                return SizedBox(
+                  height: rowHeight,
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: List.generate(7, (colIndex) {
+                      final index = rowIndex * 7 + colIndex;
+                      final dayNumber = index - offset + 1;
 
-                                            // 날짜 범위 밖은 빈 셀
-                                            if (dayNumber < 1 || dayNumber > lastDay.day) {
-                                                return const Expanded(child: SizedBox.shrink());
-                                            }
+                      // 날짜 범위 밖은 빈 셀
+                      if (dayNumber < 1 || dayNumber > lastDay.day) {
+                        return const Expanded(child: SizedBox.shrink());
+                      }
 
-                                            final cellDate = DateTime(month.year, month.month, dayNumber);
-                                            final isToday = cellDate == today;
-                                            final isSelected = cellDate == date_utils.toLocalDate(selectedDate);
-                                            final dateKey = date_utils.toDateKey(cellDate);
-                                            final entry = diaryMap[dateKey];
-                                            final holidayName = holidays[dateKey];
+                      final cellDate = DateTime(
+                        month.year,
+                        month.month,
+                        dayNumber,
+                      );
+                      final isToday = cellDate == today;
+                      final isSelected =
+                          cellDate == date_utils.toLocalDate(selectedDate);
+                      final dateKey = date_utils.toDateKey(cellDate);
+                      final entry = diaryMap[dateKey];
+                      final holidayName = holidays[dateKey];
 
-                                            return Expanded(
-                                                child: _DateCell(
-                                                    date: cellDate,
-                                                    entry: entry,
-                                                    isToday: isToday,
-                                                    isSelected: isSelected,
-                                                    holidayName: holidayName,
-                                                    onTap: () => _onDateTap(
-                                                        context,
-                                                        ref,
-                                                        cellDate,
-                                                        entry,
-                                                        holidayName,
-                                                    ),
-                                                ),
-                                            );
-                                        }),
-                                    ),
-                                );
-                            }),
-                        );
-                    },
+                      return Expanded(
+                        child: _DateCell(
+                          date: cellDate,
+                          entry: entry,
+                          isToday: isToday,
+                          isSelected: isSelected,
+                          holidayName: holidayName,
+                          onTap: () => _onDateTap(
+                            context,
+                            ref,
+                            cellDate,
+                            entry,
+                            holidayName,
+                          ),
+                        ),
+                      );
+                    }),
+                  ),
                 );
-            },
+              }),
+            );
+          },
         );
+      },
+    );
+  }
+
+  void _onDateTap(
+    BuildContext context,
+    WidgetRef ref,
+    DateTime date,
+    DiaryEntry? entry,
+    String? holidayName,
+  ) {
+    ref.read(selectedDateProvider.notifier).state = date;
+
+    final messenger = ScaffoldMessenger.of(context);
+    messenger.clearSnackBars();
+
+    if (entry != null || date_utils.isEditableDate(date)) {
+      // 작성·조회 가능한 날짜: 공휴일이면 이름 표시 후 화면 전환
+      if (holidayName != null) {
+        messenger.showSnackBar(
+          SnackBar(
+            content: Text(holidayName),
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      }
+      Navigator.of(context).push(
+        MaterialPageRoute(
+          builder: (_) => entry != null
+              ? DiaryDetailScreen(date: date)
+              : DiaryEditScreen(date: date),
+        ),
+      );
+    } else {
+      // 작성 불가 날짜: 사유 메시지 표시
+      final today = date_utils.toLocalDate(DateTime.now());
+      final target = date_utils.toLocalDate(date);
+      final base = target.isAfter(today)
+          ? '아직 오지 않은 하루예요.'
+          : '그날의 기록은 남아있지 않아요.';
+      final message = holidayName != null ? '$holidayName\n$base' : base;
+
+      messenger.showSnackBar(
+        SnackBar(content: Text(message), behavior: SnackBarBehavior.floating),
+      );
     }
-
-    void _onDateTap(
-        BuildContext context,
-        WidgetRef ref,
-        DateTime date,
-        DiaryEntry? entry,
-        String? holidayName,
-    ) {
-        ref.read(selectedDateProvider.notifier).state = date;
-
-        final messenger = ScaffoldMessenger.of(context);
-        messenger.clearSnackBars();
-
-        if (entry != null || date_utils.isEditableDate(date)) {
-            // 작성·조회 가능한 날짜: 공휴일이면 이름 표시 후 화면 전환
-            if (holidayName != null) {
-                messenger.showSnackBar(
-                    SnackBar(
-                        content: Text(holidayName),
-                        behavior: SnackBarBehavior.floating,
-                    ),
-                );
-            }
-            Navigator.of(context).push(
-                MaterialPageRoute(
-                    builder: (_) => entry != null
-                        ? DiaryDetailScreen(date: date)
-                        : DiaryEditScreen(date: date),
-                ),
-            );
-        } else {
-            // 작성 불가 날짜: 사유 메시지 표시
-            final today = date_utils.toLocalDate(DateTime.now());
-            final target = date_utils.toLocalDate(date);
-            final base = target.isAfter(today)
-                ? '아직 오지 않은 하루예요.'
-                : '그날의 기록은 남아있지 않아요.';
-            final message =
-                holidayName != null ? '$holidayName\n$base' : base;
-
-            messenger.showSnackBar(
-                SnackBar(
-                    content: Text(message),
-                    behavior: SnackBarBehavior.floating,
-                ),
-            );
-        }
-    }
+  }
 }
 
 // ─── 날짜 셀 ──────────────────────────────────────────────────────────────────
 
 class _DateCell extends StatelessWidget {
-    final DateTime date;
-    final DiaryEntry? entry;
-    final bool isToday;
-    final bool isSelected;
-    final String? holidayName;
-    final VoidCallback onTap;
+  final DateTime date;
+  final DiaryEntry? entry;
+  final bool isToday;
+  final bool isSelected;
+  final String? holidayName;
+  final VoidCallback onTap;
 
-    const _DateCell({
-        required this.date,
-        required this.entry,
-        required this.isToday,
-        required this.isSelected,
-        required this.holidayName,
-        required this.onTap,
-    });
+  const _DateCell({
+    required this.date,
+    required this.entry,
+    required this.isToday,
+    required this.isSelected,
+    required this.holidayName,
+    required this.onTap,
+  });
 
-    @override
-    Widget build(BuildContext context) {
-        final colorScheme = Theme.of(context).colorScheme;
-        final isDark = Theme.of(context).brightness == Brightness.dark;
-        final isSunday = date.weekday == DateTime.sunday;
-        final isSaturday = date.weekday == DateTime.saturday;
-        final isHoliday = holidayName != null;
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final isSunday = date.weekday == DateTime.sunday;
+    final isSaturday = date.weekday == DateTime.saturday;
+    final isHoliday = holidayName != null;
 
-        Color dayColor = isDark
-            ? colorScheme.onSurface
-            : const Color(0xFF5C4033);
-        // 공휴일(일요일 포함)은 빨간색
-        if (isSunday || isHoliday) dayColor = Colors.red.shade400;
-        if (isSaturday && !isHoliday) dayColor = Colors.blue.shade400;
+    Color dayColor = isDark ? colorScheme.onSurface : const Color(0xFF5C4033);
+    // 공휴일(일요일 포함)은 빨간색
+    if (isSunday || isHoliday) dayColor = Colors.red.shade400;
+    if (isSaturday && !isHoliday) dayColor = Colors.blue.shade400;
 
-        // 셀 배경
-        Color? cellBg;
-        if (isSelected) {
-            cellBg = colorScheme.primaryContainer;
-        } else if (entry != null && !isDark) {
-            cellBg = const Color(0xFFFFF8F0);
-        }
-
-        return GestureDetector(
-            onTap: onTap,
-            child: Container(
-                margin: const EdgeInsets.all(2),
-                width: double.infinity,
-                height: double.infinity,
-                decoration: BoxDecoration(
-                    color: cellBg,
-                    borderRadius: BorderRadius.circular(10),
-                    border: isToday
-                        ? Border.all(
-                            color: colorScheme.primary,
-                            width: 2,
-                          )
-                        : null,
-                ),
-                child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                        // 날짜 숫자
-                        Text(
-                            '${date.day}',
-                            style: TextStyle(
-                                fontSize: 12,
-                                fontWeight: isToday
-                                    ? FontWeight.w800
-                                    : FontWeight.w500,
-                                color: isSelected
-                                    ? colorScheme.onPrimaryContainer
-                                    : dayColor,
-                            ),
-                        ),
-                        const SizedBox(height: 3),
-                        // 감정 이모지 — 세로 2줄로 표시
-                        if (entry != null)
-                            _OverlappingEmojis(emotions: entry!.emotions.values)
-                        else
-                            const SizedBox(height: 20),
-                    ],
-                ),
-            ),
-        );
+    // 셀 배경
+    Color? cellBg;
+    if (isSelected) {
+      cellBg = colorScheme.primaryContainer;
+    } else if (entry != null && !isDark) {
+      cellBg = const Color(0xFFFFF8F0);
     }
+
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        margin: const EdgeInsets.all(2),
+        width: double.infinity,
+        height: double.infinity,
+        decoration: BoxDecoration(
+          color: cellBg,
+          borderRadius: BorderRadius.circular(10),
+          border: isToday
+              ? Border.all(color: colorScheme.primary, width: 2)
+              : null,
+        ),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            // 날짜 숫자
+            Text(
+              '${date.day}',
+              style: TextStyle(
+                fontSize: 12,
+                fontWeight: isToday ? FontWeight.w800 : FontWeight.w500,
+                color: isSelected ? colorScheme.onPrimaryContainer : dayColor,
+              ),
+            ),
+            const SizedBox(height: 3),
+            // 감정 이모지 — 세로 2줄로 표시
+            if (entry != null)
+              _OverlappingEmojis(emotions: entry!.emotions.values)
+            else
+              const SizedBox(height: 20),
+          ],
+        ),
+      ),
+    );
+  }
 }
 
 // ─── 이모지 표시 ──────────────────────────────────────────────────────────────
@@ -510,53 +508,50 @@ class _DateCell extends StatelessWidget {
 /// 개수가 적을수록 크게, 많을수록 작게 표시한다.
 /// - 1개: 20px / 2개: 17px / 3개: 14px
 class _OverlappingEmojis extends StatelessWidget {
-    final Iterable<Emotion> emotions;
+  final Iterable<Emotion> emotions;
 
-    const _OverlappingEmojis({required this.emotions});
+  const _OverlappingEmojis({required this.emotions});
 
-    // 개수별 폰트 크기
-    static double _fontSize(int count) => switch (count) {
-        1 => 20,
-        2 => 17,
-        _ => 14,
-    };
+  // 개수별 폰트 크기
+  static double _fontSize(int count) => switch (count) {
+    1 => 20,
+    2 => 17,
+    _ => 14,
+  };
 
-    // 이모지 간 겹침 간격 (fontSize보다 약간 작게)
-    static double _step(int count) => switch (count) {
-        1 => 0,
-        2 => 12,
-        _ => 10,
-    };
+  // 이모지 간 겹침 간격 (fontSize보다 약간 작게)
+  static double _step(int count) => switch (count) {
+    1 => 0,
+    2 => 12,
+    _ => 10,
+  };
 
-    @override
-    Widget build(BuildContext context) {
-        final list = emotions.toList();
-        if (list.isEmpty) return const SizedBox(height: 20);
+  @override
+  Widget build(BuildContext context) {
+    final list = emotions.toList();
+    if (list.isEmpty) return const SizedBox(height: 20);
 
-        final fontSize = _fontSize(list.length);
-        final step = _step(list.length);
-        final double totalWidth = list.length == 1
-            ? fontSize * 1.3
-            : (list.length - 1) * step + fontSize * 1.3;
-        final double height = fontSize * 1.35;
+    final fontSize = _fontSize(list.length);
+    final step = _step(list.length);
+    final double totalWidth = list.length == 1
+        ? fontSize * 1.3
+        : (list.length - 1) * step + fontSize * 1.3;
+    final double height = fontSize * 1.35;
 
-        return SizedBox(
-            width: totalWidth,
-            height: height,
-            child: Stack(
-                children: [
-                    // 역순 렌더링: 첫 번째 이모지가 가장 앞에 표시됨
-                    for (int i = list.length - 1; i >= 0; i--)
-                        Positioned(
-                            left: i * step,
-                            top: 0,
-                            child: Text(
-                                list[i].emoji,
-                                style: TextStyle(fontSize: fontSize),
-                            ),
-                        ),
-                ],
+    return SizedBox(
+      width: totalWidth,
+      height: height,
+      child: Stack(
+        children: [
+          // 역순 렌더링: 첫 번째 이모지가 가장 앞에 표시됨
+          for (int i = list.length - 1; i >= 0; i--)
+            Positioned(
+              left: i * step,
+              top: 0,
+              child: Text(list[i].emoji, style: TextStyle(fontSize: fontSize)),
             ),
-        );
-    }
+        ],
+      ),
+    );
+  }
 }

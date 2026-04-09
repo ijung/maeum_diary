@@ -10,31 +10,25 @@ import 'package:maeum_diary/infrastructure/port/diary_data_source_port.dart';
 // ─── Infrastructure ───────────────────────────────────────────────────────────
 
 final diaryLocalDataSourceProvider = Provider<DiaryDataSourcePort>(
-    (_) => DiaryLocalDataSource.instance,
+  (_) => DiaryLocalDataSource.instance,
 );
 
 final diaryRepositoryProvider = Provider<DiaryRepository>((ref) {
-    return DiaryRepositoryAdapter(
-        dataSource: ref.read(diaryLocalDataSourceProvider),
-    );
+  return DiaryRepositoryAdapter(
+    dataSource: ref.read(diaryLocalDataSourceProvider),
+  );
 });
 
 // ─── Application ─────────────────────────────────────────────────────────────
 
 final saveDiaryUseCaseProvider = Provider<SaveDiaryUseCase>((ref) {
-    return SaveDiaryUseCase(
-        repository: ref.read(diaryRepositoryProvider),
-    );
+  return SaveDiaryUseCase(repository: ref.read(diaryRepositoryProvider));
 });
 
 final getDiaryByDateUseCaseProvider = Provider<GetDiaryByDateUseCase>((ref) {
-    return GetDiaryByDateUseCase(
-        repository: ref.read(diaryRepositoryProvider),
-    );
+  return GetDiaryByDateUseCase(repository: ref.read(diaryRepositoryProvider));
 });
 
 final getMonthlyDiaryUseCaseProvider = Provider<GetMonthlyDiaryUseCase>((ref) {
-    return GetMonthlyDiaryUseCase(
-        repository: ref.read(diaryRepositoryProvider),
-    );
+  return GetMonthlyDiaryUseCase(repository: ref.read(diaryRepositoryProvider));
 });
