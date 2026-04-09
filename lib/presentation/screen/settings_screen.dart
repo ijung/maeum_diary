@@ -11,15 +11,27 @@ class SettingsScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final bgColor = isDark ? cs.surface : const Color(0xFFF5F0E8);
+    final titleColor = isDark ? cs.onSurface : const Color(0xFF5C4033);
 
     return Scaffold(
-      backgroundColor: cs.surfaceContainerLowest,
+      backgroundColor: bgColor,
       appBar: AppBar(
-        backgroundColor: cs.surfaceContainerLowest,
+        backgroundColor: bgColor,
+        surfaceTintColor: Colors.transparent,
         elevation: 0,
-        title: const Text(
+        title: Text(
           '설정',
-          style: TextStyle(fontWeight: FontWeight.w700, fontSize: 20),
+          style: TextStyle(
+            fontWeight: FontWeight.w800,
+            fontSize: 20,
+            color: titleColor,
+            letterSpacing: 0.5,
+          ),
+        ),
+        iconTheme: IconThemeData(
+          color: isDark ? cs.onSurface : const Color(0xFF8D6E63),
         ),
         centerTitle: true,
       ),
@@ -55,15 +67,19 @@ class _SectionLabel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final color = isDark
+        ? Theme.of(context).colorScheme.primary
+        : const Color(0xFF8D6E63);
     return Padding(
       padding: const EdgeInsets.fromLTRB(4, 20, 4, 8),
       child: Text(
         text,
         style: TextStyle(
           fontSize: 12,
-          fontWeight: FontWeight.w600,
+          fontWeight: FontWeight.w700,
           letterSpacing: 0.5,
-          color: Theme.of(context).colorScheme.primary,
+          color: color,
         ),
       ),
     );
@@ -76,12 +92,33 @@ class _SectionCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      elevation: 0,
-      margin: EdgeInsets.zero,
-      color: Theme.of(context).colorScheme.surfaceContainerLow,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-      child: Column(children: children),
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final cardBg = isDark
+        ? Theme.of(context).colorScheme.surfaceContainerLow
+        : Colors.white.withValues(alpha: 0.9);
+    final borderColor = isDark
+        ? Theme.of(context).colorScheme.outline.withValues(alpha: 0.2)
+        : const Color(0xFFD7C4A8);
+
+    return Container(
+      decoration: BoxDecoration(
+        color: cardBg,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: borderColor, width: 1.5),
+        boxShadow: isDark
+            ? null
+            : [
+                BoxShadow(
+                  color: const Color(0xFF8D6E63).withValues(alpha: 0.08),
+                  blurRadius: 12,
+                  offset: const Offset(0, 4),
+                ),
+              ],
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(20),
+        child: Column(children: children),
+      ),
     );
   }
 }

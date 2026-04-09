@@ -17,12 +17,27 @@ class DiaryDetailScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final diaryAsync = ref.watch(diaryByDateProvider(date));
     final canEdit = isEditableDate(date);
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final colorScheme = Theme.of(context).colorScheme;
+    final bgColor = isDark ? colorScheme.surface : const Color(0xFFF5F0E8);
+    final titleColor = isDark ? colorScheme.onSurface : const Color(0xFF5C4033);
 
     return Scaffold(
+      backgroundColor: bgColor,
       appBar: AppBar(
+        backgroundColor: bgColor,
+        surfaceTintColor: Colors.transparent,
+        elevation: 0,
         title: Text(
           DateFormat('yyyy년 M월 d일 (E)', 'ko').format(date),
-          style: const TextStyle(fontSize: 16),
+          style: TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.w700,
+            color: titleColor,
+          ),
+        ),
+        iconTheme: IconThemeData(
+          color: isDark ? colorScheme.onSurface : const Color(0xFF8D6E63),
         ),
         actions: [
           if (canEdit)
@@ -52,21 +67,56 @@ class DiaryDetailScreen extends ConsumerWidget {
             return const Center(child: Text('일기가 없습니다.'));
           }
 
+          final isDark = Theme.of(context).brightness == Brightness.dark;
+          final cardBg = isDark
+              ? Theme.of(context).colorScheme.surfaceContainerLow
+              : Colors.white.withValues(alpha: 0.9);
+          final borderColor = isDark
+              ? Theme.of(context).colorScheme.outline.withValues(alpha: 0.2)
+              : const Color(0xFFD7C4A8);
+
           return SingleChildScrollView(
-            padding: const EdgeInsets.all(24),
+            padding: const EdgeInsets.all(16),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // 이모지 크게 표시
-                _EmotionsDisplay(emotions: entry.emotions.values),
-                const SizedBox(height: 32),
-                // 메모
-                if (entry.memo != null && entry.memo!.isNotEmpty) ...[
-                  _MemoDisplay(memo: entry.memo!),
-                  const SizedBox(height: 24),
-                ],
+                // 이모지 + 메모 카드
+                Container(
+                  width: double.infinity,
+                  decoration: BoxDecoration(
+                    color: cardBg,
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(color: borderColor, width: 1.5),
+                    boxShadow: isDark
+                        ? null
+                        : [
+                            BoxShadow(
+                              color: const Color(
+                                0xFF8D6E63,
+                              ).withValues(alpha: 0.08),
+                              blurRadius: 12,
+                              offset: const Offset(0, 4),
+                            ),
+                          ],
+                  ),
+                  padding: const EdgeInsets.all(24),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      _EmotionsDisplay(emotions: entry.emotions.values),
+                      if (entry.memo != null && entry.memo!.isNotEmpty) ...[
+                        const SizedBox(height: 28),
+                        _MemoDisplay(memo: entry.memo!),
+                      ],
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 16),
                 // 작성/수정 일시
-                _TimestampDisplay(entry: entry),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 4),
+                  child: _TimestampDisplay(entry: entry),
+                ),
               ],
             ),
           );
@@ -127,24 +177,30 @@ class _MemoDisplay extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     final colorScheme = Theme.of(context).colorScheme;
+    final labelColor = isDark ? colorScheme.primary : const Color(0xFF8D6E63);
+    final memoBg = isDark
+        ? colorScheme.surfaceContainerHighest
+        : const Color(0xFFF5F0E8);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
           '메모',
           style: TextStyle(
-            fontSize: 14,
-            fontWeight: FontWeight.w600,
-            color: colorScheme.primary,
+            fontSize: 13,
+            fontWeight: FontWeight.w700,
+            color: labelColor,
+            letterSpacing: 0.3,
           ),
         ),
         const SizedBox(height: 8),
         Container(
           width: double.infinity,
-          padding: const EdgeInsets.all(16),
+          padding: const EdgeInsets.all(14),
           decoration: BoxDecoration(
-            color: colorScheme.surfaceContainerHighest,
+            color: memoBg,
             borderRadius: BorderRadius.circular(12),
           ),
           child: Text(memo, style: const TextStyle(fontSize: 15, height: 1.6)),

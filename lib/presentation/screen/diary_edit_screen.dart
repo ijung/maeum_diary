@@ -62,12 +62,27 @@ class _DiaryEditScreenState extends ConsumerState<DiaryEditScreen> {
 
     final isLoading = saveState is SaveDiaryLoading;
     final canSave = _selectedEmotions.isNotEmpty && !isLoading;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final colorScheme = Theme.of(context).colorScheme;
+    final bgColor = isDark ? colorScheme.surface : const Color(0xFFF5F0E8);
+    final titleColor = isDark ? colorScheme.onSurface : const Color(0xFF5C4033);
 
     return Scaffold(
+      backgroundColor: bgColor,
       appBar: AppBar(
+        backgroundColor: bgColor,
+        surfaceTintColor: Colors.transparent,
+        elevation: 0,
         title: Text(
           DateFormat('yyyy년 M월 d일 (E)', 'ko').format(widget.date),
-          style: const TextStyle(fontSize: 16),
+          style: TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.w700,
+            color: titleColor,
+          ),
+        ),
+        iconTheme: IconThemeData(
+          color: isDark ? colorScheme.onSurface : const Color(0xFF8D6E63),
         ),
         actions: [
           TextButton(
@@ -78,9 +93,14 @@ class _DiaryEditScreenState extends ConsumerState<DiaryEditScreen> {
                     height: 18,
                     child: CircularProgressIndicator(strokeWidth: 2),
                   )
-                : const Text(
+                : Text(
                     '저장',
-                    style: TextStyle(fontWeight: FontWeight.w700),
+                    style: TextStyle(
+                      fontWeight: FontWeight.w700,
+                      color: isDark
+                          ? colorScheme.primary
+                          : const Color(0xFF8D6E63),
+                    ),
                   ),
           ),
         ],
@@ -198,12 +218,17 @@ class _SectionLabel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final color = isDark
+        ? Theme.of(context).colorScheme.primary
+        : const Color(0xFF8D6E63);
     return Text(
       label,
       style: TextStyle(
-        fontSize: 14,
-        fontWeight: FontWeight.w600,
-        color: Theme.of(context).colorScheme.primary,
+        fontSize: 13,
+        fontWeight: FontWeight.w700,
+        color: color,
+        letterSpacing: 0.3,
       ),
     );
   }
@@ -234,6 +259,14 @@ class _EmotionPicker extends StatelessWidget {
         final isSelected = selected.contains(emotion);
         final isDisabled = !isSelected && isMaxSelected;
 
+        final isDark = Theme.of(context).brightness == Brightness.dark;
+        final unselectedBg = isDark
+            ? colorScheme.surfaceContainerHighest
+            : const Color(0xFFEDE0D4);
+        final borderColor = isDark
+            ? colorScheme.primary
+            : const Color(0xFF8D6E63);
+
         return GestureDetector(
           onTap: isDisabled ? onMaxReached : () => onToggle(emotion),
           child: AnimatedContainer(
@@ -243,11 +276,11 @@ class _EmotionPicker extends StatelessWidget {
               color: isSelected
                   ? colorScheme.primaryContainer
                   : isDisabled
-                  ? colorScheme.surfaceContainerHighest.withValues(alpha: 0.4)
-                  : colorScheme.surfaceContainerHighest,
+                  ? unselectedBg.withValues(alpha: 0.4)
+                  : unselectedBg,
               borderRadius: BorderRadius.circular(20),
               border: isSelected
-                  ? Border.all(color: colorScheme.primary, width: 2)
+                  ? Border.all(color: borderColor, width: 2)
                   : null,
             ),
             child: Row(
@@ -309,8 +342,15 @@ class _MemoFieldState extends State<_MemoField> {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     final colorScheme = Theme.of(context).colorScheme;
     final isOver = _length > widget.maxLength;
+    final fieldBg = isDark
+        ? colorScheme.surfaceContainerHighest
+        : Colors.white.withValues(alpha: 0.9);
+    final borderColor = isDark
+        ? colorScheme.outline.withValues(alpha: 0.3)
+        : const Color(0xFFD7C4A8);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.end,
@@ -321,9 +361,23 @@ class _MemoFieldState extends State<_MemoField> {
           minLines: 4,
           decoration: InputDecoration(
             hintText: '오늘 하루 어떠셨나요?',
-            border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(16),
+              borderSide: BorderSide(color: borderColor, width: 1.5),
+            ),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(16),
+              borderSide: BorderSide(color: borderColor, width: 1.5),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(16),
+              borderSide: BorderSide(
+                color: isDark ? colorScheme.primary : const Color(0xFF8D6E63),
+                width: 2,
+              ),
+            ),
             filled: true,
-            fillColor: colorScheme.surfaceContainerHighest,
+            fillColor: fieldBg,
           ),
         ),
         const SizedBox(height: 4),
