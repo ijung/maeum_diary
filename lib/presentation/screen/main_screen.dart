@@ -85,11 +85,9 @@ class _MonthHeader extends ConsumerWidget {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 8),
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           // 이전 달 버튼
           _NavButton(
-            label: '이전 달',
             icon: Icons.chevron_left,
             bg: buttonBg,
             fg: buttonFg,
@@ -100,31 +98,31 @@ class _MonthHeader extends ConsumerWidget {
               );
             },
           ),
-          // 월 표시
-          Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const Text('🐾', style: TextStyle(fontSize: 14)),
-              const SizedBox(width: 6),
-              Text(
-                label,
-                style: TextStyle(
-                  fontSize: 17,
-                  fontWeight: FontWeight.w700,
-                  color: isDark
-                      ? Theme.of(context).colorScheme.onSurface
-                      : const Color(0xFF5C4033),
+          // 월 표시 (남은 공간 전부 차지)
+          Expanded(
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const Text('🐾', style: TextStyle(fontSize: 14)),
+                const SizedBox(width: 6),
+                Text(
+                  label,
+                  style: TextStyle(
+                    fontSize: 17,
+                    fontWeight: FontWeight.w700,
+                    color: isDark
+                        ? Theme.of(context).colorScheme.onSurface
+                        : const Color(0xFF5C4033),
+                  ),
                 ),
-              ),
-              const SizedBox(width: 6),
-              const Text('🐾', style: TextStyle(fontSize: 14)),
-            ],
+                const SizedBox(width: 6),
+                const Text('🐾', style: TextStyle(fontSize: 14)),
+              ],
+            ),
           ),
           // 다음 달 버튼
           _NavButton(
-            label: '다음 달',
             icon: Icons.chevron_right,
-            iconLeading: false,
             bg: buttonBg,
             fg: buttonFg,
             onTap: () {
@@ -140,22 +138,18 @@ class _MonthHeader extends ConsumerWidget {
   }
 }
 
-/// 이전/다음 달 pill 버튼
+/// 이전/다음 달 아이콘 버튼
 class _NavButton extends StatelessWidget {
-  final String label;
   final IconData icon;
-  final bool iconLeading;
   final Color bg;
   final Color fg;
   final VoidCallback onTap;
 
   const _NavButton({
-    required this.label,
     required this.icon,
     required this.bg,
     required this.fg,
     required this.onTap,
-    this.iconLeading = true,
   });
 
   @override
@@ -163,39 +157,9 @@ class _NavButton extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
-        decoration: BoxDecoration(
-          color: bg,
-          borderRadius: BorderRadius.circular(20),
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: iconLeading
-              ? [
-                  Icon(icon, size: 16, color: fg),
-                  const SizedBox(width: 3),
-                  Text(
-                    label,
-                    style: TextStyle(
-                      fontSize: 12,
-                      color: fg,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ]
-              : [
-                  Text(
-                    label,
-                    style: TextStyle(
-                      fontSize: 12,
-                      color: fg,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                  const SizedBox(width: 3),
-                  Icon(icon, size: 16, color: fg),
-                ],
-        ),
+        padding: const EdgeInsets.all(8),
+        decoration: BoxDecoration(color: bg, shape: BoxShape.circle),
+        child: Icon(icon, size: 18, color: fg),
       ),
     );
   }
