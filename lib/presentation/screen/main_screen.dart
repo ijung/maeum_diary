@@ -252,11 +252,65 @@ class _CalendarCard extends ConsumerWidget {
             children: [
               _WeekDayHeader(),
               Divider(height: 1, thickness: 1),
-              Expanded(child: _CalendarGrid()),
+              Expanded(child: _AnimatedCalendarGrid()),
             ],
           ),
         ),
       ),
+    );
+  }
+}
+
+// ─── 애니메이션 캘린더 그리드 래퍼 ───────────────────────────────────────────────
+
+/// 월 이동 시 좌우 슬라이드 전환 애니메이션을 적용하는 래퍼
+class _AnimatedCalendarGrid extends ConsumerStatefulWidget {
+  const _AnimatedCalendarGrid();
+
+  @override
+  ConsumerState<_AnimatedCalendarGrid> createState() =>
+      _AnimatedCalendarGridState();
+}
+
+class _AnimatedCalendarGridState extends ConsumerState<_AnimatedCalendarGrid> {
+  // 1 = 다음 달(왼쪽 스와이프), -1 = 이전 달(오른쪽 스와이프)
+  int _direction = 1;
+  DateTime? _prevMonth;
+
+  @override
+  Widget build(BuildContext context) {
+    final month = ref.watch(selectedMonthProvider);
+
+    if (_prevMonth != null && month != _prevMonth) {
+      _direction = month.isAfter(_prevMonth!) ? 1 : -1;
+    }
+    _prevMonth = month;
+
+    final direction = _direction;
+
+    return AnimatedSwitcher(
+      duration: const Duration(milliseconds: 300),
+      transitionBuilder: (child, animation) {
+        final isEntering =
+            (child.key as ValueKey<DateTime>).value == month;
+        final beginOffset = Offset(
+          isEntering ? direction.toDouble() : -direction.toDouble(),
+          0,
+        );
+        return SlideTransition(
+          position: Tween<Offset>(
+            begin: beginOffset,
+            end: Offset.zero,
+          ).animate(
+            CurvedAnimation(parent: animation, curve: Curves.easeInOut),
+          ),
+          child: child,
+        );
+      },
+      layoutBuilder: (currentChild, previousChildren) => Stack(
+        children: [...previousChildren, ?currentChild],
+      ),
+      child: _CalendarGrid(key: ValueKey(month)),
     );
   }
 }
@@ -313,7 +367,7 @@ class _WeekDayHeader extends StatelessWidget {
 // ─── 캘린더 그리드 ─────────────────────────────────────────────────────────────
 
 class _CalendarGrid extends ConsumerWidget {
-  const _CalendarGrid();
+  const _CalendarGrid({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
