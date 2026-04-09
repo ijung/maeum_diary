@@ -6,6 +6,8 @@ enum Activity {
   workDinner,
   study,
   exercise,
+  walking,
+  hiking,
   shopping,
   travel,
   movie,
@@ -29,6 +31,10 @@ extension ActivityExtension on Activity {
         return '📚';
       case Activity.exercise:
         return '💪';
+      case Activity.walking:
+        return '🚶';
+      case Activity.hiking:
+        return '🧗';
       case Activity.shopping:
         return '🛍️';
       case Activity.travel:
@@ -58,6 +64,10 @@ extension ActivityExtension on Activity {
         return '공부';
       case Activity.exercise:
         return '운동';
+      case Activity.walking:
+        return '산책';
+      case Activity.hiking:
+        return '등산';
       case Activity.shopping:
         return '쇼핑';
       case Activity.travel:

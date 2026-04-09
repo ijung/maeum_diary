@@ -382,14 +382,14 @@ class _ActivityPicker extends StatelessWidget {
           onTap: isDisabled ? onMaxReached : () => onToggle(activity),
           child: AnimatedContainer(
             duration: const Duration(milliseconds: 150),
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
             decoration: BoxDecoration(
               color: isSelected
                   ? colorScheme.primaryContainer
                   : isDisabled
                   ? unselectedBg.withValues(alpha: 0.4)
                   : unselectedBg,
-              borderRadius: BorderRadius.circular(20),
+              borderRadius: BorderRadius.circular(14),
               border: isSelected
                   ? Border.all(color: borderColor, width: 2)
                   : null,
@@ -397,12 +397,12 @@ class _ActivityPicker extends StatelessWidget {
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Text(activity.emoji, style: const TextStyle(fontSize: 22)),
-                const SizedBox(width: 6),
+                Text(activity.emoji, style: const TextStyle(fontSize: 16)),
+                const SizedBox(width: 3),
                 Text(
                   activity.label,
                   style: TextStyle(
-                    fontSize: 13,
+                    fontSize: 11,
                     color: isDisabled
                         ? colorScheme.onSurface.withValues(alpha: 0.4)
                         : isSelected
