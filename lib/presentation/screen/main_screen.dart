@@ -15,22 +15,34 @@ class MainScreen extends ConsumerWidget {
 
     @override
     Widget build(BuildContext context, WidgetRef ref) {
+        final colorScheme = Theme.of(context).colorScheme;
+        final isDark = Theme.of(context).brightness == Brightness.dark;
+        final bgColor = isDark
+            ? colorScheme.surface
+            : const Color(0xFFF5F0E8);
+
         return Scaffold(
-            backgroundColor: Theme.of(context).colorScheme.surface,
+            backgroundColor: bgColor,
             appBar: AppBar(
-                backgroundColor: Theme.of(context).colorScheme.surface,
+                backgroundColor: bgColor,
+                surfaceTintColor: Colors.transparent,
                 elevation: 0,
-                title: const Text(
+                title: Text(
                     '마음 일기',
                     style: TextStyle(
-                        fontWeight: FontWeight.w700,
-                        fontSize: 20,
+                        fontWeight: FontWeight.w800,
+                        fontSize: 22,
+                        color: isDark ? colorScheme.onSurface : const Color(0xFF5C4033),
+                        letterSpacing: 1.5,
                     ),
                 ),
                 centerTitle: true,
                 actions: [
                     IconButton(
-                        icon: const Icon(Icons.settings_outlined),
+                        icon: Icon(
+                            Icons.settings_outlined,
+                            color: isDark ? colorScheme.onSurface : const Color(0xFF8D6E63),
+                        ),
                         tooltip: '설정',
                         onPressed: () => Navigator.of(context).push(
                             MaterialPageRoute(
@@ -40,19 +52,23 @@ class MainScreen extends ConsumerWidget {
                     ),
                 ],
             ),
-            body: const Column(
-                children: [
-                    _MonthHeader(),
-                    SizedBox(height: 8),
-                    _WeekDayHeader(),
-                    Expanded(child: _CalendarGrid()),
-                ],
+            body: Padding(
+                padding: const EdgeInsets.fromLTRB(12, 0, 12, 12),
+                child: Column(
+                    children: [
+                        const _MonthHeader(),
+                        const SizedBox(height: 8),
+                        Expanded(
+                            child: _CalendarCard(isDark: isDark),
+                        ),
+                    ],
+                ),
             ),
         );
     }
 }
 
-// ─── 월 헤더 (< 2024년 6월 >) ──────────────────────────────────────────────────
+// ─── 월 헤더 (이전 달 / 2024년 4월 / 다음 달) ─────────────────────────────────
 
 class _MonthHeader extends ConsumerWidget {
     const _MonthHeader();
@@ -61,29 +77,64 @@ class _MonthHeader extends ConsumerWidget {
     Widget build(BuildContext context, WidgetRef ref) {
         final month = ref.watch(selectedMonthProvider);
         final label = DateFormat('yyyy년 M월', 'ko').format(month);
+        final isDark = Theme.of(context).brightness == Brightness.dark;
+        final buttonBg = isDark
+            ? Theme.of(context).colorScheme.surfaceContainerHighest
+            : const Color(0xFFEDE0D4);
+        final buttonFg = isDark
+            ? Theme.of(context).colorScheme.onSurface
+            : const Color(0xFF6D4C41);
 
         return Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+            padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 8),
             child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                    IconButton(
-                        icon: const Icon(Icons.chevron_left),
-                        onPressed: () {
+                    // 이전 달 버튼
+                    _NavButton(
+                        label: '이전 달',
+                        icon: Icons.chevron_left,
+                        bg: buttonBg,
+                        fg: buttonFg,
+                        onTap: () {
                             ref.read(selectedMonthProvider.notifier).state =
                                 DateTime(month.year, month.month - 1);
                         },
                     ),
-                    Text(
-                        label,
-                        style: const TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.w600,
-                        ),
+                    // 월 표시
+                    Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                            const Text(
+                                '🐾',
+                                style: TextStyle(fontSize: 14),
+                            ),
+                            const SizedBox(width: 6),
+                            Text(
+                                label,
+                                style: TextStyle(
+                                    fontSize: 17,
+                                    fontWeight: FontWeight.w700,
+                                    color: isDark
+                                        ? Theme.of(context).colorScheme.onSurface
+                                        : const Color(0xFF5C4033),
+                                ),
+                            ),
+                            const SizedBox(width: 6),
+                            const Text(
+                                '🐾',
+                                style: TextStyle(fontSize: 14),
+                            ),
+                        ],
                     ),
-                    IconButton(
-                        icon: const Icon(Icons.chevron_right),
-                        onPressed: () {
+                    // 다음 달 버튼
+                    _NavButton(
+                        label: '다음 달',
+                        icon: Icons.chevron_right,
+                        iconLeading: false,
+                        bg: buttonBg,
+                        fg: buttonFg,
+                        onTap: () {
                             ref.read(selectedMonthProvider.notifier).state =
                                 DateTime(month.year, month.month + 1);
                         },
@@ -94,41 +145,141 @@ class _MonthHeader extends ConsumerWidget {
     }
 }
 
-// ─── 요일 헤더 (월 화 수 목 금 토 일) ──────────────────────────────────────────
+/// 이전/다음 달 pill 버튼
+class _NavButton extends StatelessWidget {
+    final String label;
+    final IconData icon;
+    final bool iconLeading;
+    final Color bg;
+    final Color fg;
+    final VoidCallback onTap;
+
+    const _NavButton({
+        required this.label,
+        required this.icon,
+        required this.bg,
+        required this.fg,
+        required this.onTap,
+        this.iconLeading = true,
+    });
+
+    @override
+    Widget build(BuildContext context) {
+        return GestureDetector(
+            onTap: onTap,
+            child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
+                decoration: BoxDecoration(
+                    color: bg,
+                    borderRadius: BorderRadius.circular(20),
+                ),
+                child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: iconLeading
+                        ? [
+                            Icon(icon, size: 16, color: fg),
+                            const SizedBox(width: 3),
+                            Text(label, style: TextStyle(fontSize: 12, color: fg, fontWeight: FontWeight.w600)),
+                          ]
+                        : [
+                            Text(label, style: TextStyle(fontSize: 12, color: fg, fontWeight: FontWeight.w600)),
+                            const SizedBox(width: 3),
+                            Icon(icon, size: 16, color: fg),
+                          ],
+                ),
+            ),
+        );
+    }
+}
+
+// ─── 캘린더 카드 (요일 헤더 + 그리드) ────────────────────────────────────────
+
+class _CalendarCard extends StatelessWidget {
+    final bool isDark;
+    const _CalendarCard({required this.isDark});
+
+    @override
+    Widget build(BuildContext context) {
+        final cardBg = isDark
+            ? Theme.of(context).colorScheme.surfaceContainerLow
+            : Colors.white.withValues(alpha: 0.9);
+        final borderColor = isDark
+            ? Theme.of(context).colorScheme.outline.withValues(alpha: 0.2)
+            : const Color(0xFFD7C4A8);
+
+        return Container(
+            decoration: BoxDecoration(
+                color: cardBg,
+                borderRadius: BorderRadius.circular(20),
+                border: Border.all(color: borderColor, width: 1.5),
+                boxShadow: isDark
+                    ? null
+                    : [
+                        BoxShadow(
+                            color: const Color(0xFF8D6E63).withValues(alpha: 0.08),
+                            blurRadius: 12,
+                            offset: const Offset(0, 4),
+                        ),
+                      ],
+            ),
+            child: ClipRRect(
+                borderRadius: BorderRadius.circular(20),
+                child: const Column(
+                    children: [
+                        _WeekDayHeader(),
+                        Divider(height: 1, thickness: 1),
+                        Expanded(child: _CalendarGrid()),
+                    ],
+                ),
+            ),
+        );
+    }
+}
+
+// ─── 요일 헤더 (일 월 화 수 목 금 토) ─────────────────────────────────────────
 
 class _WeekDayHeader extends StatelessWidget {
     const _WeekDayHeader();
 
+    // 월요일 시작
     static const _labels = ['월', '화', '수', '목', '금', '토', '일'];
 
     @override
     Widget build(BuildContext context) {
-        return Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 8),
+        final isDark = Theme.of(context).brightness == Brightness.dark;
+        final headerBg = isDark
+            ? Theme.of(context).colorScheme.surfaceContainerHigh
+            : const Color(0xFFF0E6D8);
+
+        return Container(
+            color: headerBg,
+            padding: const EdgeInsets.symmetric(vertical: 10),
             child: Row(
-                children: _labels
-                    .map(
-                        (label) => Expanded(
-                            child: Center(
-                                child: Text(
-                                    label,
-                                    style: TextStyle(
-                                        fontSize: 13,
-                                        fontWeight: FontWeight.w600,
-                                        color: label == '일'
-                                            ? Colors.red.shade400
-                                            : label == '토'
-                                                ? Colors.blue.shade400
-                                                : Theme.of(context)
-                                                    .colorScheme
-                                                    .onSurface
-                                                    .withValues(alpha: 0.6),
-                                    ),
+                children: _labels.asMap().entries.map((e) {
+                    final label = e.value;
+                    Color textColor;
+                    if (label == '일') {
+                        textColor = Colors.red.shade400;
+                    } else if (label == '토') {
+                        textColor = Colors.blue.shade400;
+                    } else {
+                        textColor = isDark
+                            ? Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.7)
+                            : const Color(0xFF6D4C41).withValues(alpha: 0.8);
+                    }
+                    return Expanded(
+                        child: Center(
+                            child: Text(
+                                label,
+                                style: TextStyle(
+                                    fontSize: 13,
+                                    fontWeight: FontWeight.w700,
+                                    color: textColor,
                                 ),
                             ),
                         ),
-                    )
-                    .toList(),
+                    );
+                }).toList(),
             ),
         );
     }
@@ -162,46 +313,53 @@ class _CalendarGrid extends ConsumerWidget {
                 final totalCells = offset + lastDay.day;
                 final rows = (totalCells / 7).ceil();
 
-                return GridView.builder(
-                    padding: const EdgeInsets.symmetric(horizontal: 8),
-                    physics: const NeverScrollableScrollPhysics(),
-                    gridDelegate:
-                        const SliverGridDelegateWithFixedCrossAxisCount(
-                            crossAxisCount: 7,
-                            childAspectRatio: 0.75,
-                        ),
-                    itemCount: rows * 7,
-                    itemBuilder: (context, index) {
-                        final dayNumber = index - offset + 1;
+                // LayoutBuilder로 실제 높이를 얻어 행 높이를 동적으로 결정
+                return LayoutBuilder(
+                    builder: (context, constraints) {
+                        final rowHeight = constraints.maxHeight / rows;
 
-                        // 날짜 범위 밖은 빈 셀
-                        if (dayNumber < 1 || dayNumber > lastDay.day) {
-                            return const SizedBox.shrink();
-                        }
+                        return Column(
+                            children: List.generate(rows, (rowIndex) {
+                                return SizedBox(
+                                    height: rowHeight,
+                                    child: Row(
+                                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                                        children: List.generate(7, (colIndex) {
+                                            final index = rowIndex * 7 + colIndex;
+                                            final dayNumber = index - offset + 1;
 
-                        final cellDate =
-                            DateTime(month.year, month.month, dayNumber);
-                        final isToday = cellDate == today;
-                        final isSelected = cellDate ==
-                            date_utils.toLocalDate(selectedDate);
+                                            // 날짜 범위 밖은 빈 셀
+                                            if (dayNumber < 1 || dayNumber > lastDay.day) {
+                                                return const Expanded(child: SizedBox.shrink());
+                                            }
 
-                        final dateKey = date_utils.toDateKey(cellDate);
-                        final entry = diaryMap[dateKey];
-                        final holidayName = holidays[dateKey];
+                                            final cellDate = DateTime(month.year, month.month, dayNumber);
+                                            final isToday = cellDate == today;
+                                            final isSelected = cellDate == date_utils.toLocalDate(selectedDate);
+                                            final dateKey = date_utils.toDateKey(cellDate);
+                                            final entry = diaryMap[dateKey];
+                                            final holidayName = holidays[dateKey];
 
-                        return _DateCell(
-                            date: cellDate,
-                            entry: entry,
-                            isToday: isToday,
-                            isSelected: isSelected,
-                            holidayName: holidayName,
-                            onTap: () => _onDateTap(
-                                context,
-                                ref,
-                                cellDate,
-                                entry,
-                                holidayName,
-                            ),
+                                            return Expanded(
+                                                child: _DateCell(
+                                                    date: cellDate,
+                                                    entry: entry,
+                                                    isToday: isToday,
+                                                    isSelected: isSelected,
+                                                    holidayName: holidayName,
+                                                    onTap: () => _onDateTap(
+                                                        context,
+                                                        ref,
+                                                        cellDate,
+                                                        entry,
+                                                        holidayName,
+                                                    ),
+                                                ),
+                                            );
+                                        }),
+                                    ),
+                                );
+                            }),
                         );
                     },
                 );
@@ -280,23 +438,34 @@ class _DateCell extends StatelessWidget {
     @override
     Widget build(BuildContext context) {
         final colorScheme = Theme.of(context).colorScheme;
+        final isDark = Theme.of(context).brightness == Brightness.dark;
         final isSunday = date.weekday == DateTime.sunday;
         final isSaturday = date.weekday == DateTime.saturday;
         final isHoliday = holidayName != null;
 
-        Color dayColor = colorScheme.onSurface;
-        // 공휴일(일요일 포함)은 빨간색, 토요일 공휴일도 빨간색 우선
+        Color dayColor = isDark
+            ? colorScheme.onSurface
+            : const Color(0xFF5C4033);
+        // 공휴일(일요일 포함)은 빨간색
         if (isSunday || isHoliday) dayColor = Colors.red.shade400;
         if (isSaturday && !isHoliday) dayColor = Colors.blue.shade400;
+
+        // 셀 배경
+        Color? cellBg;
+        if (isSelected) {
+            cellBg = colorScheme.primaryContainer;
+        } else if (entry != null && !isDark) {
+            cellBg = const Color(0xFFFFF8F0);
+        }
 
         return GestureDetector(
             onTap: onTap,
             child: Container(
                 margin: const EdgeInsets.all(2),
+                width: double.infinity,
+                height: double.infinity,
                 decoration: BoxDecoration(
-                    color: isSelected
-                        ? colorScheme.primaryContainer
-                        : Colors.transparent,
+                    color: cellBg,
                     borderRadius: BorderRadius.circular(10),
                     border: isToday
                         ? Border.all(
@@ -312,21 +481,21 @@ class _DateCell extends StatelessWidget {
                         Text(
                             '${date.day}',
                             style: TextStyle(
-                                fontSize: 13,
+                                fontSize: 12,
                                 fontWeight: isToday
-                                    ? FontWeight.w700
-                                    : FontWeight.w400,
+                                    ? FontWeight.w800
+                                    : FontWeight.w500,
                                 color: isSelected
                                     ? colorScheme.onPrimaryContainer
                                     : dayColor,
                             ),
                         ),
-                        const SizedBox(height: 2),
-                        // 선택된 감정 이모지 — 겹쳐서 한 줄 표시
+                        const SizedBox(height: 3),
+                        // 감정 이모지 — 세로 2줄로 표시
                         if (entry != null)
                             _OverlappingEmojis(emotions: entry!.emotions.values)
                         else
-                            const SizedBox(height: 16),
+                            const SizedBox(height: 20),
                     ],
                 ),
             ),
@@ -334,43 +503,56 @@ class _DateCell extends StatelessWidget {
     }
 }
 
-// ─── 겹치는 이모지 행 ──────────────────────────────────────────────────────────
+// ─── 이모지 표시 ──────────────────────────────────────────────────────────────
 
-/// 이모지를 일부 겹쳐서 한 줄로 표시하는 위젯
+/// 감정 이모지를 셀 안에 겹쳐서 한 줄로 표시하는 위젯
 ///
-/// 셀 너비 초과를 막기 위해 [_step]만큼씩 오른쪽으로 이동하며 배치한다.
+/// 개수가 적을수록 크게, 많을수록 작게 표시한다.
+/// - 1개: 20px / 2개: 17px / 3개: 14px
 class _OverlappingEmojis extends StatelessWidget {
     final Iterable<Emotion> emotions;
 
-    /// 이모지 폰트 크기 (렌더링 높이 ≈ fontSize * 1.3)
-    static const double _fontSize = 13;
-
-    /// 각 이모지 사이의 간격 (겹치도록 fontSize보다 작게 유지)
-    static const double _step = 9;
-
     const _OverlappingEmojis({required this.emotions});
+
+    // 개수별 폰트 크기
+    static double _fontSize(int count) => switch (count) {
+        1 => 20,
+        2 => 17,
+        _ => 14,
+    };
+
+    // 이모지 간 겹침 간격 (fontSize보다 약간 작게)
+    static double _step(int count) => switch (count) {
+        1 => 0,
+        2 => 12,
+        _ => 10,
+    };
 
     @override
     Widget build(BuildContext context) {
         final list = emotions.toList();
-        // 전체 너비: (n-1) * step + 이모지 한 글자 폭(≈fontSize * 1.3)
-        final double totalWidth =
-            (list.length - 1) * _step + _fontSize * 1.3;
-        const double height = _fontSize * 1.35;
+        if (list.isEmpty) return const SizedBox(height: 20);
+
+        final fontSize = _fontSize(list.length);
+        final step = _step(list.length);
+        final double totalWidth = list.length == 1
+            ? fontSize * 1.3
+            : (list.length - 1) * step + fontSize * 1.3;
+        final double height = fontSize * 1.35;
 
         return SizedBox(
             width: totalWidth,
             height: height,
             child: Stack(
                 children: [
-                    // 역순으로 렌더링해 첫 번째 이모지가 가장 위(앞)에 표시되게 한다
+                    // 역순 렌더링: 첫 번째 이모지가 가장 앞에 표시됨
                     for (int i = list.length - 1; i >= 0; i--)
                         Positioned(
-                            left: i * _step,
+                            left: i * step,
                             top: 0,
                             child: Text(
                                 list[i].emoji,
-                                style: const TextStyle(fontSize: _fontSize),
+                                style: TextStyle(fontSize: fontSize),
                             ),
                         ),
                 ],

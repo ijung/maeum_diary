@@ -27,7 +27,7 @@ flutter test
 
 # 단일 테스트 파일 실행
 flutter test test/application/use_case/save_diary_use_case_test.dart
-
+달
 # 정적 분석
 flutter analyze
 

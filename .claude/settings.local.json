@@ -28,7 +28,9 @@
       "Bash(grep:*)",
       "Bash(wc -l lib/**/*.dart)",
       "Bash(wc -l test/**/*.dart)",
-      "Bash(wc -l /Users/june.dev/Codes/github.com/ijung/maeum_diary/lib/presentation/screen/*.dart /Users/june.dev/Codes/github.com/ijung/maeum_diary/lib/presentation/provider/*.dart /Users/june.dev/Codes/github.com/ijung/maeum_diary/lib/core/service/*.dart /Users/june.dev/Codes/github.com/ijung/maeum_diary/lib/infrastructure/**/*.dart /Users/june.dev/Codes/github.com/ijung/maeum_diary/lib/application/use_case/*.dart)"
+      "Bash(wc -l /Users/june.dev/Codes/github.com/ijung/maeum_diary/lib/presentation/screen/*.dart /Users/june.dev/Codes/github.com/ijung/maeum_diary/lib/presentation/provider/*.dart /Users/june.dev/Codes/github.com/ijung/maeum_diary/lib/core/service/*.dart /Users/june.dev/Codes/github.com/ijung/maeum_diary/lib/infrastructure/**/*.dart /Users/june.dev/Codes/github.com/ijung/maeum_diary/lib/application/use_case/*.dart)",
+      "WebSearch",
+      "Bash(claude mcp:*)"
     ]
   }
 }
