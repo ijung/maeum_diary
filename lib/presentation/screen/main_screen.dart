@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:maeum_diary/core/utils/date_utils.dart' as date_utils;
 import 'package:maeum_diary/domain/entity/diary_entry.dart';
+import 'package:maeum_diary/domain/value_object/activity.dart';
 import 'package:maeum_diary/domain/value_object/emotion.dart';
 import 'package:maeum_diary/presentation/provider/calendar_provider.dart';
 import 'package:maeum_diary/presentation/screen/diary_detail_screen.dart';
@@ -518,11 +519,16 @@ class _DateCell extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 3),
-            // 감정 이모지 — 세로 2줄로 표시
+            // 감정 이모지
             if (entry != null)
               _OverlappingEmojis(emotions: entry!.emotions.values)
             else
               const SizedBox(height: 20),
+            // 오늘 한 일 이모지
+            if (entry != null && entry!.activities.values.isNotEmpty) ...[
+              const SizedBox(height: 2),
+              _OverlappingActivityEmojis(activities: entry!.activities.values),
+            ],
           ],
         ),
       ),
@@ -535,7 +541,7 @@ class _DateCell extends StatelessWidget {
 /// 감정 이모지를 셀 안에 겹쳐서 한 줄로 표시하는 위젯
 ///
 /// 개수가 적을수록 크게, 많을수록 작게 표시한다.
-/// - 1개: 20px / 2개: 17px / 3개: 14px
+/// - 1개: 21px / 2개: 18px / 3개: 15px
 class _OverlappingEmojis extends StatelessWidget {
   final Iterable<Emotion> emotions;
 
@@ -543,16 +549,16 @@ class _OverlappingEmojis extends StatelessWidget {
 
   // 개수별 폰트 크기
   static double _fontSize(int count) => switch (count) {
-    1 => 20,
-    2 => 17,
-    _ => 14,
+    1 => 21,
+    2 => 18,
+    _ => 15,
   };
 
   // 이모지 간 겹침 간격 (fontSize보다 약간 작게)
   static double _step(int count) => switch (count) {
     1 => 0,
-    2 => 12,
-    _ => 10,
+    2 => 10,
+    _ => 8,
   };
 
   @override
@@ -573,6 +579,60 @@ class _OverlappingEmojis extends StatelessWidget {
       child: Stack(
         children: [
           // 역순 렌더링: 첫 번째 이모지가 가장 앞에 표시됨
+          for (int i = list.length - 1; i >= 0; i--)
+            Positioned(
+              left: i * step,
+              top: 0,
+              child: Text(list[i].emoji, style: TextStyle(fontSize: fontSize)),
+            ),
+        ],
+      ),
+    );
+  }
+}
+
+/// 오늘 한 일 이모지를 셀 안에 겹쳐서 한 줄로 표시하는 위젯
+///
+/// 감정 이모지보다 작은 크기로 표시하며, 개수에 따라 크기가 달라진다.
+/// - 1개: 14px / 2개: 13px / 3개: 12px / 4개: 11px / 5개: 10px
+class _OverlappingActivityEmojis extends StatelessWidget {
+  final Iterable<Activity> activities;
+
+  const _OverlappingActivityEmojis({required this.activities});
+
+  static double _fontSize(int count) => switch (count) {
+    1 => 14,
+    2 => 13,
+    3 => 12,
+    4 => 11,
+    _ => 10,
+  };
+
+  static double _step(int count) => switch (count) {
+    1 => 0,
+    2 => 19,
+    3 => 10,
+    4 => 7,
+    _ => 6,
+  };
+
+  @override
+  Widget build(BuildContext context) {
+    final list = activities.toList();
+    if (list.isEmpty) return const SizedBox.shrink();
+
+    final fontSize = _fontSize(list.length);
+    final step = _step(list.length);
+    final double totalWidth = list.length == 1
+        ? fontSize * 1.3
+        : (list.length - 1) * step + fontSize * 1.3;
+    final double height = fontSize * 1.35;
+
+    return SizedBox(
+      width: totalWidth,
+      height: height,
+      child: Stack(
+        children: [
           for (int i = list.length - 1; i >= 0; i--)
             Positioned(
               left: i * step,
