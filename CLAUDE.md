@@ -55,7 +55,7 @@ Presentation → Application → Domain ← Infrastructure
 | **Application** | `lib/application/` | UseCase 단위 비즈니스 흐름 조율. Domain에만 의존 |
 | **Infrastructure** | `lib/infrastructure/` | SQLite Adapter. DiaryRepository 구현체, DTO/Mapper |
 | **Presentation** | `lib/presentation/` | Riverpod Provider + Flutter Widget. UseCase를 통해서만 데이터 접근 |
-| **Core** | `lib/core/` | 전 레이어 공유 유틸. `Failure` sealed class, `isEditableDate` 유틸 |
+| **Core** | `lib/core/` | 전 레이어 공유 유틸. `Failure` sealed class, `isEditableDate` 유틸, 공유 상수(`constants/`) |
 | **DI** | `lib/core/di/providers.dart` | Riverpod Provider 정의. 전체 DI 연결 지점 |
 
 ### 핵심 도메인 규칙
@@ -110,6 +110,8 @@ test/
 ├── domain/
 │   ├── entity/diary_entry_test.dart
 │   └── value_object/
+│       ├── emotion_test.dart               # Emotion enum 이모지/레이블 매핑
+│       ├── activity_test.dart              # Activity enum 이모지/레이블 매핑
 │       ├── emotions_selection_test.dart
 │       └── activities_selection_test.dart
 ├── infrastructure/

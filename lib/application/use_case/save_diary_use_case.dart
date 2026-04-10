@@ -1,3 +1,4 @@
+import 'package:maeum_diary/core/constants/diary_constants.dart';
 import 'package:maeum_diary/core/error/failures.dart';
 import 'package:maeum_diary/core/utils/date_utils.dart';
 import 'package:maeum_diary/domain/entity/diary_entry.dart';
@@ -28,8 +29,6 @@ final class SaveDiaryInput {
 /// - 메모는 옵셔널이지만 있을 경우 500자를 초과할 수 없음
 /// - 해당 날짜에 이미 일기가 존재하면 update, 없으면 save
 final class SaveDiaryUseCase {
-  static const int _maxMemoLength = 500;
-
   final DiaryRepository _repository;
   final Uuid _uuid;
 
@@ -58,7 +57,7 @@ final class SaveDiaryUseCase {
     // 메모 길이 검증
     final trimmedMemo = input.memo?.trim();
     if (trimmedMemo != null && trimmedMemo.isNotEmpty) {
-      if (trimmedMemo.length > _maxMemoLength) {
+      if (trimmedMemo.length > DiaryConstants.maxMemoLength) {
         return const MemoTooLongFailure();
       }
     }

@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:maeum_diary/application/use_case/save_diary_use_case.dart';
+import 'package:maeum_diary/core/constants/diary_constants.dart';
 import 'package:maeum_diary/core/service/notification_service.dart';
 import 'package:maeum_diary/core/utils/date_utils.dart' as date_utils;
 import 'package:maeum_diary/domain/value_object/activities_selection.dart';
@@ -24,8 +25,6 @@ class DiaryEditScreen extends ConsumerStatefulWidget {
 }
 
 class _DiaryEditScreenState extends ConsumerState<DiaryEditScreen> {
-  static const int _maxMemoLength = 500;
-
   late final TextEditingController _memoController;
 
   // 선택된 감정 목록 (UI 상태로만 관리)
@@ -131,7 +130,7 @@ class _DiaryEditScreenState extends ConsumerState<DiaryEditScreen> {
             const SizedBox(height: 32),
             const _SectionLabel(label: '오늘의 이야기'),
             const SizedBox(height: 12),
-            _MemoField(controller: _memoController, maxLength: _maxMemoLength),
+            _MemoField(controller: _memoController, maxLength: DiaryConstants.maxMemoLength),
             // 에러 메시지 표시
             if (saveState is SaveDiaryError)
               Padding(

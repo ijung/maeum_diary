@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:maeum_diary/core/constants/notification_pref_keys.dart';
 import 'package:maeum_diary/core/di/providers.dart';
 import 'package:maeum_diary/core/service/notification_service.dart';
 import 'package:maeum_diary/core/utils/date_utils.dart' as date_utils;
@@ -36,15 +37,9 @@ class NotificationSettings {
 
 /// 알림 설정 상태 관리
 ///
-/// SharedPreferences에 'notif_enabled', 'notif_hour', 'notif_minute' 키로 저장한다.
 /// 설정 변경 시 NotificationService를 통해 즉시 재스케줄링한다.
 final class NotificationSettingsNotifier
     extends AsyncNotifier<NotificationSettings> {
-  static const String _enabledKey = 'notif_enabled';
-  static const String _hourKey = 'notif_hour';
-  static const String _minuteKey = 'notif_minute';
-  static const String _alwaysNotifyKey = 'notif_always_notify';
-
   // 기본 알림 시각: 21:00
   static const int _defaultHour = 21;
   static const int _defaultMinute = 0;
@@ -53,12 +48,12 @@ final class NotificationSettingsNotifier
   Future<NotificationSettings> build() async {
     final prefs = await SharedPreferences.getInstance();
     return NotificationSettings(
-      enabled: prefs.getBool(_enabledKey) ?? false,
+      enabled: prefs.getBool(NotificationPrefKeys.enabled) ?? false,
       time: TimeOfDay(
-        hour: prefs.getInt(_hourKey) ?? _defaultHour,
-        minute: prefs.getInt(_minuteKey) ?? _defaultMinute,
+        hour: prefs.getInt(NotificationPrefKeys.hour) ?? _defaultHour,
+        minute: prefs.getInt(NotificationPrefKeys.minute) ?? _defaultMinute,
       ),
-      alwaysNotify: prefs.getBool(_alwaysNotifyKey) ?? false,
+      alwaysNotify: prefs.getBool(NotificationPrefKeys.alwaysNotify) ?? false,
     );
   }
 
@@ -73,7 +68,7 @@ final class NotificationSettingsNotifier
     }
 
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setBool(_enabledKey, enabled);
+    await prefs.setBool(NotificationPrefKeys.enabled, enabled);
 
     final next = current.copyWith(enabled: enabled);
     state = AsyncData(next);
@@ -88,7 +83,7 @@ final class NotificationSettingsNotifier
       );
     } catch (_) {
       // 스케줄링 실패 시 저장된 설정을 원래대로 롤백
-      await prefs.setBool(_enabledKey, current.enabled);
+      await prefs.setBool(NotificationPrefKeys.enabled, current.enabled);
       state = AsyncData(current);
       rethrow;
     }
@@ -99,7 +94,7 @@ final class NotificationSettingsNotifier
     if (current == null) return;
 
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setBool(_alwaysNotifyKey, value);
+    await prefs.setBool(NotificationPrefKeys.alwaysNotify, value);
     state = AsyncData(current.copyWith(alwaysNotify: value));
 
     // alwaysNotify를 끄면 오늘 일기 작성 여부에 따라 알림 재스케줄
@@ -120,8 +115,8 @@ final class NotificationSettingsNotifier
     if (current == null) return;
 
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setInt(_hourKey, time.hour);
-    await prefs.setInt(_minuteKey, time.minute);
+    await prefs.setInt(NotificationPrefKeys.hour, time.hour);
+    await prefs.setInt(NotificationPrefKeys.minute, time.minute);
 
     // 시간 설정은 스케줄링 성공 여부와 무관하게 즉시 반영
     state = AsyncData(current.copyWith(time: time));

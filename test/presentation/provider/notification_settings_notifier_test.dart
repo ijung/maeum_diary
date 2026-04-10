@@ -192,6 +192,65 @@ void main() {
     });
   });
 
+  // ─── setEnabled() ─────────────────────────────────────────────────────────
+  //
+  // setEnabled()는 reschedule 실패 시 상태를 원래대로 롤백하고 예외를 rethrow한다.
+  // 테스트 환경에서 NotificationService가 미초기화 상태이므로 reschedule은 항상 실패한다.
+
+  group('setEnabled()', () {
+    test('reschedule 실패 시 state가 원래 값으로 롤백된다', () async {
+      SharedPreferences.setMockInitialValues({'notif_enabled': true});
+      final container = makeContainer();
+      addTearDown(container.dispose);
+
+      await container.read(notificationSettingsProvider.future);
+
+      // 테스트 환경에서 NotificationService 미초기화 → reschedule 실패 → 롤백 후 rethrow
+      await expectLater(
+        container.read(notificationSettingsProvider.notifier).setEnabled(false),
+        throwsA(anything),
+      );
+
+      // 롤백 확인: 원래 enabled=true로 복원된다
+      expect(
+        container.read(notificationSettingsProvider).value?.enabled,
+        isTrue,
+      );
+    });
+
+    test('reschedule 실패 시 SharedPreferences도 원래 값으로 롤백된다', () async {
+      SharedPreferences.setMockInitialValues({'notif_enabled': true});
+      final container = makeContainer();
+      addTearDown(container.dispose);
+
+      await container.read(notificationSettingsProvider.future);
+
+      await expectLater(
+        container.read(notificationSettingsProvider.notifier).setEnabled(false),
+        throwsA(anything),
+      );
+
+      final prefs = await SharedPreferences.getInstance();
+      expect(prefs.getBool('notif_enabled'), isTrue);
+    });
+
+    test('false로 변경 시 오늘 일기 존재 여부를 조회하지 않는다', () async {
+      SharedPreferences.setMockInitialValues({'notif_enabled': true});
+      final container = makeContainer();
+      addTearDown(container.dispose);
+
+      await container.read(notificationSettingsProvider.future);
+
+      // enabled=false이면 skipToday 계산 시 short-circuit으로 _hasDiaryToday() 미호출
+      await container
+          .read(notificationSettingsProvider.notifier)
+          .setEnabled(false)
+          .catchError((_) {});
+
+      verifyNever(() => mockRepository.findByDate(any()));
+    });
+  });
+
   // ─── setTime() ────────────────────────────────────────────────────────────
 
   group('setTime()', () {

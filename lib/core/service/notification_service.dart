@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_timezone/flutter_timezone.dart';
+import 'package:maeum_diary/core/constants/notification_pref_keys.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:timezone/data/latest_all.dart' as tz;
 import 'package:timezone/timezone.dart' as tz;
@@ -24,11 +25,6 @@ class NotificationService {
   static const String _channelId = 'daily_reminder';
   static const String _channelName = '매일 일기 알림';
 
-  // SharedPreferences 키
-  static const String _enabledKey = 'notif_enabled';
-  static const String _hourKey = 'notif_hour';
-  static const String _minuteKey = 'notif_minute';
-  static const String _alwaysNotifyKey = 'notif_always_notify';
 
   /// 알림 탭 핸들러 등록
   void setOnNotificationTap(void Function() handler) {
@@ -105,10 +101,10 @@ class NotificationService {
   /// 호출부에서 오늘 일기 존재 여부를 조회해 전달해야 한다.
   Future<void> rescheduleFromPrefs({bool hasDiaryToday = false}) async {
     final prefs = await SharedPreferences.getInstance();
-    final enabled = prefs.getBool(_enabledKey) ?? false;
-    final hour = prefs.getInt(_hourKey) ?? 21;
-    final minute = prefs.getInt(_minuteKey) ?? 0;
-    final alwaysNotify = prefs.getBool(_alwaysNotifyKey) ?? false;
+    final enabled = prefs.getBool(NotificationPrefKeys.enabled) ?? false;
+    final hour = prefs.getInt(NotificationPrefKeys.hour) ?? 21;
+    final minute = prefs.getInt(NotificationPrefKeys.minute) ?? 0;
+    final alwaysNotify = prefs.getBool(NotificationPrefKeys.alwaysNotify) ?? false;
 
     final skipToday = !alwaysNotify && hasDiaryToday;
 
