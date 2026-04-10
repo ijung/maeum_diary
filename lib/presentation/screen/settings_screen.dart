@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:maeum_diary/presentation/provider/app_info_provider.dart';
 import 'package:maeum_diary/presentation/provider/notification_settings_provider.dart';
 import 'package:maeum_diary/presentation/provider/theme_provider.dart';
+import 'package:maeum_diary/presentation/theme/app_colors.dart';
 
 /// 설정 화면
 class SettingsScreen extends StatelessWidget {
@@ -12,8 +13,8 @@ class SettingsScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final bgColor = isDark ? cs.surface : const Color(0xFFF5F0E8);
-    final titleColor = isDark ? cs.onSurface : const Color(0xFF5C4033);
+    final bgColor = isDark ? cs.surface : AppColors.background;
+    final titleColor = isDark ? cs.onSurface : AppColors.titleText;
 
     return Scaffold(
       backgroundColor: bgColor,
@@ -31,7 +32,7 @@ class SettingsScreen extends StatelessWidget {
           ),
         ),
         iconTheme: IconThemeData(
-          color: isDark ? cs.onSurface : const Color(0xFF8D6E63),
+          color: isDark ? cs.onSurface : AppColors.primary,
         ),
         centerTitle: true,
       ),
@@ -70,7 +71,7 @@ class _SectionLabel extends StatelessWidget {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final color = isDark
         ? Theme.of(context).colorScheme.primary
-        : const Color(0xFF8D6E63);
+        : AppColors.primary;
     return Padding(
       padding: const EdgeInsets.fromLTRB(4, 20, 4, 8),
       child: Text(
@@ -98,7 +99,7 @@ class _SectionCard extends StatelessWidget {
         : Colors.white.withValues(alpha: 0.9);
     final borderColor = isDark
         ? Theme.of(context).colorScheme.outline.withValues(alpha: 0.2)
-        : const Color(0xFFD7C4A8);
+        : AppColors.cardBorder;
 
     return Container(
       decoration: BoxDecoration(
@@ -109,7 +110,7 @@ class _SectionCard extends StatelessWidget {
             ? null
             : [
                 BoxShadow(
-                  color: const Color(0xFF8D6E63).withValues(alpha: 0.08),
+                  color: AppColors.primary.withValues(alpha: 0.08),
                   blurRadius: 12,
                   offset: const Offset(0, 4),
                 ),

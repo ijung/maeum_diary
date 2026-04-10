@@ -13,6 +13,8 @@ import 'package:maeum_diary/domain/value_object/emotion.dart';
 import 'package:maeum_diary/domain/value_object/emotions_selection.dart';
 import 'package:maeum_diary/presentation/provider/diary_provider.dart';
 import 'package:maeum_diary/presentation/provider/notification_settings_provider.dart';
+import 'package:maeum_diary/presentation/theme/app_colors.dart';
+import 'package:maeum_diary/presentation/utils/snackbar_helper.dart';
 
 /// 일기 기록 / 수정 화면
 class DiaryEditScreen extends ConsumerStatefulWidget {
@@ -68,8 +70,8 @@ class _DiaryEditScreenState extends ConsumerState<DiaryEditScreen> {
     final canSave = _selectedEmotions.isNotEmpty && !isLoading;
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final colorScheme = Theme.of(context).colorScheme;
-    final bgColor = isDark ? colorScheme.surface : const Color(0xFFF5F0E8);
-    final titleColor = isDark ? colorScheme.onSurface : const Color(0xFF5C4033);
+    final bgColor = isDark ? colorScheme.surface : AppColors.background;
+    final titleColor = isDark ? colorScheme.onSurface : AppColors.titleText;
 
     return Scaffold(
       backgroundColor: bgColor,
@@ -86,7 +88,7 @@ class _DiaryEditScreenState extends ConsumerState<DiaryEditScreen> {
           ),
         ),
         iconTheme: IconThemeData(
-          color: isDark ? colorScheme.onSurface : const Color(0xFF8D6E63),
+          color: isDark ? colorScheme.onSurface : AppColors.primary,
         ),
         actions: [
           if (isLoading)
@@ -101,7 +103,7 @@ class _DiaryEditScreenState extends ConsumerState<DiaryEditScreen> {
           else
             IconButton(
               onPressed: canSave ? _onSave : null,
-              color: isDark ? colorScheme.primary : const Color(0xFF8D6E63),
+              color: isDark ? colorScheme.primary : AppColors.primary,
               icon: const Icon(Icons.check_rounded),
               tooltip: '기록하기',
             ),
@@ -147,14 +149,7 @@ class _DiaryEditScreenState extends ConsumerState<DiaryEditScreen> {
   }
 
   void _onActivityMaxReached() {
-    final messenger = ScaffoldMessenger.of(context);
-    messenger.clearSnackBars();
-    messenger.showSnackBar(
-      const SnackBar(
-        content: Text('오늘 한 일은 최대 5개까지 선택할 수 있어요.'),
-        behavior: SnackBarBehavior.floating,
-      ),
-    );
+    showFloatingSnackBar(context, '오늘 한 일은 최대 5개까지 선택할 수 있어요.');
   }
 
   void _toggleActivity(Activity activity) {
@@ -171,14 +166,7 @@ class _DiaryEditScreenState extends ConsumerState<DiaryEditScreen> {
   }
 
   void _onEmotionMaxReached() {
-    final messenger = ScaffoldMessenger.of(context);
-    messenger.clearSnackBars();
-    messenger.showSnackBar(
-      const SnackBar(
-        content: Text('감정은 최대 3개까지 선택할 수 있어요.'),
-        behavior: SnackBarBehavior.floating,
-      ),
-    );
+    showFloatingSnackBar(context, '감정은 최대 3개까지 선택할 수 있어요.');
   }
 
   void _toggleEmotion(Emotion emotion) {
@@ -203,9 +191,7 @@ class _DiaryEditScreenState extends ConsumerState<DiaryEditScreen> {
     try {
       selection = EmotionsSelection(_selectedEmotions);
     } on ArgumentError catch (e) {
-      final messenger = ScaffoldMessenger.of(context);
-      messenger.clearSnackBars();
-      messenger.showSnackBar(SnackBar(content: Text(e.message.toString())));
+      showFloatingSnackBar(context, e.message.toString());
       return;
     }
 
@@ -258,7 +244,7 @@ class _SectionLabel extends StatelessWidget {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final color = isDark
         ? Theme.of(context).colorScheme.primary
-        : const Color(0xFF8D6E63);
+        : AppColors.primary;
     return Text(
       label,
       style: TextStyle(
@@ -299,10 +285,10 @@ class _EmotionPicker extends StatelessWidget {
         final isDark = Theme.of(context).brightness == Brightness.dark;
         final unselectedBg = isDark
             ? colorScheme.surfaceContainerHighest
-            : const Color(0xFFEDE0D4);
+            : AppColors.selectedBg;
         final borderColor = isDark
             ? colorScheme.primary
-            : const Color(0xFF8D6E63);
+            : AppColors.primary;
 
         return GestureDetector(
           onTap: isDisabled ? onMaxReached : () => onToggle(emotion),
@@ -365,8 +351,8 @@ class _ActivityPicker extends StatelessWidget {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final unselectedBg = isDark
         ? colorScheme.surfaceContainerHighest
-        : const Color(0xFFEDE0D4);
-    final borderColor = isDark ? colorScheme.primary : const Color(0xFF8D6E63);
+        : AppColors.selectedBg;
+    final borderColor = isDark ? colorScheme.primary : AppColors.primary;
 
     return Wrap(
       spacing: 8,
@@ -458,7 +444,7 @@ class _MemoFieldState extends State<_MemoField> {
         : Colors.white.withValues(alpha: 0.9);
     final borderColor = isDark
         ? colorScheme.outline.withValues(alpha: 0.3)
-        : const Color(0xFFD7C4A8);
+        : AppColors.cardBorder;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.end,
@@ -480,7 +466,7 @@ class _MemoFieldState extends State<_MemoField> {
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(16),
               borderSide: BorderSide(
-                color: isDark ? colorScheme.primary : const Color(0xFF8D6E63),
+                color: isDark ? colorScheme.primary : AppColors.primary,
                 width: 2,
               ),
             ),

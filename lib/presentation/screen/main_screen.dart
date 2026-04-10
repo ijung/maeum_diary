@@ -8,6 +8,8 @@ import 'package:maeum_diary/presentation/provider/calendar_provider.dart';
 import 'package:maeum_diary/presentation/screen/diary_detail_screen.dart';
 import 'package:maeum_diary/presentation/screen/diary_edit_screen.dart';
 import 'package:maeum_diary/presentation/screen/settings_screen.dart';
+import 'package:maeum_diary/presentation/theme/app_colors.dart';
+import 'package:maeum_diary/presentation/utils/snackbar_helper.dart';
 
 /// 앱의 메인 화면 — 월 캘린더
 class MainScreen extends ConsumerWidget {
@@ -17,7 +19,7 @@ class MainScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final colorScheme = Theme.of(context).colorScheme;
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final bgColor = isDark ? colorScheme.surface : const Color(0xFFF5F0E8);
+    final bgColor = isDark ? colorScheme.surface : AppColors.background;
 
     return Scaffold(
       backgroundColor: bgColor,
@@ -30,7 +32,7 @@ class MainScreen extends ConsumerWidget {
           style: TextStyle(
             fontWeight: FontWeight.w800,
             fontSize: 22,
-            color: isDark ? colorScheme.onSurface : const Color(0xFF5C4033),
+            color: isDark ? colorScheme.onSurface : AppColors.titleText,
             letterSpacing: 1.5,
           ),
         ),
@@ -39,7 +41,7 @@ class MainScreen extends ConsumerWidget {
           IconButton(
             icon: Icon(
               Icons.settings_outlined,
-              color: isDark ? colorScheme.onSurface : const Color(0xFF8D6E63),
+              color: isDark ? colorScheme.onSurface : AppColors.primary,
             ),
             tooltip: '설정',
             onPressed: () => Navigator.of(
@@ -77,10 +79,10 @@ class _MonthHeader extends ConsumerWidget {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final buttonBg = isDark
         ? Theme.of(context).colorScheme.surfaceContainerHighest
-        : const Color(0xFFEDE0D4);
+        : AppColors.selectedBg;
     final buttonFg = isDark
         ? Theme.of(context).colorScheme.onSurface
-        : const Color(0xFF6D4C41);
+        : AppColors.subText;
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 8),
@@ -112,7 +114,7 @@ class _MonthHeader extends ConsumerWidget {
                     fontWeight: FontWeight.w700,
                     color: isDark
                         ? Theme.of(context).colorScheme.onSurface
-                        : const Color(0xFF5C4033),
+                        : AppColors.titleText,
                   ),
                 ),
                 const SizedBox(width: 6),
@@ -178,7 +180,7 @@ class _CalendarCard extends ConsumerWidget {
         : Colors.white.withValues(alpha: 0.9);
     final borderColor = isDark
         ? Theme.of(context).colorScheme.outline.withValues(alpha: 0.2)
-        : const Color(0xFFD7C4A8);
+        : AppColors.cardBorder;
 
     return GestureDetector(
       onHorizontalDragEnd: (details) {
@@ -204,7 +206,7 @@ class _CalendarCard extends ConsumerWidget {
               ? null
               : [
                   BoxShadow(
-                    color: const Color(0xFF8D6E63).withValues(alpha: 0.08),
+                    color: AppColors.primary.withValues(alpha: 0.08),
                     blurRadius: 12,
                     offset: const Offset(0, 4),
                   ),
@@ -292,7 +294,7 @@ class _WeekDayHeader extends StatelessWidget {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final headerBg = isDark
         ? Theme.of(context).colorScheme.surfaceContainerHigh
-        : const Color(0xFFF0E6D8);
+        : AppColors.headerBg;
 
     return Container(
       color: headerBg,
@@ -308,7 +310,7 @@ class _WeekDayHeader extends StatelessWidget {
           } else {
             textColor = isDark
                 ? Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.7)
-                : const Color(0xFF6D4C41).withValues(alpha: 0.8);
+                : AppColors.subText.withValues(alpha: 0.8);
           }
           return Expanded(
             child: Center(
@@ -423,19 +425,12 @@ class _CalendarGrid extends ConsumerWidget {
     String? holidayName,
   ) {
     ref.read(selectedDateProvider.notifier).state = date;
-
-    final messenger = ScaffoldMessenger.of(context);
-    messenger.clearSnackBars();
+    ScaffoldMessenger.of(context).clearSnackBars();
 
     if (entry != null || date_utils.isEditableDate(date)) {
       // 작성·조회 가능한 날짜: 공휴일이면 이름 표시 후 화면 전환
       if (holidayName != null) {
-        messenger.showSnackBar(
-          SnackBar(
-            content: Text(holidayName),
-            behavior: SnackBarBehavior.floating,
-          ),
-        );
+        showFloatingSnackBar(context, holidayName);
       }
       Navigator.of(context).push(
         MaterialPageRoute(
@@ -452,10 +447,7 @@ class _CalendarGrid extends ConsumerWidget {
           ? '아직 오지 않은 하루예요.'
           : '작성 기간(당일~다음날 15시)이 지나 기록할 수 없어요 🥲';
       final message = holidayName != null ? '$holidayName\n$base' : base;
-
-      messenger.showSnackBar(
-        SnackBar(content: Text(message), behavior: SnackBarBehavior.floating),
-      );
+      showFloatingSnackBar(context, message);
     }
   }
 }
@@ -487,7 +479,7 @@ class _DateCell extends StatelessWidget {
     final isSaturday = date.weekday == DateTime.saturday;
     final isHoliday = holidayName != null;
 
-    Color dayColor = isDark ? colorScheme.onSurface : const Color(0xFF5C4033);
+    Color dayColor = isDark ? colorScheme.onSurface : AppColors.titleText;
     // 공휴일(일요일 포함)은 빨간색
     if (isSunday || isHoliday) dayColor = Colors.red.shade400;
     if (isSaturday && !isHoliday) dayColor = Colors.blue.shade400;
@@ -497,7 +489,7 @@ class _DateCell extends StatelessWidget {
     if (isSelected) {
       cellBg = colorScheme.primaryContainer;
     } else if (entry != null && !isDark) {
-      cellBg = const Color(0xFFFFF8F0);
+      cellBg = AppColors.todayCellBg;
     }
 
     return GestureDetector(

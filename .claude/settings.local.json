@@ -39,7 +39,8 @@
       "Bash(gh auth:*)",
       "Bash(git add:*)",
       "Bash(git commit:*)",
-      "Bash(git:*)"
+      "Bash(git:*)",
+      "Bash(wc -l /Users/june.dev/Codes/github.com/ijung/maeum_diary/lib/presentation/screen/*.dart)"
     ]
   }
 }

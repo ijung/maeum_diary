@@ -7,6 +7,8 @@ import 'package:maeum_diary/domain/value_object/activity.dart';
 import 'package:maeum_diary/domain/value_object/emotion.dart';
 import 'package:maeum_diary/presentation/provider/diary_provider.dart';
 import 'package:maeum_diary/presentation/screen/diary_edit_screen.dart';
+import 'package:maeum_diary/presentation/theme/app_colors.dart';
+import 'package:maeum_diary/presentation/utils/snackbar_helper.dart';
 
 /// 특정 날짜 일기 상세 조회 화면
 class DiaryDetailScreen extends ConsumerWidget {
@@ -20,8 +22,8 @@ class DiaryDetailScreen extends ConsumerWidget {
     final canEdit = isEditableDate(date);
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final colorScheme = Theme.of(context).colorScheme;
-    final bgColor = isDark ? colorScheme.surface : const Color(0xFFF5F0E8);
-    final titleColor = isDark ? colorScheme.onSurface : const Color(0xFF5C4033);
+    final bgColor = isDark ? colorScheme.surface : AppColors.background;
+    final titleColor = isDark ? colorScheme.onSurface : AppColors.titleText;
 
     return Scaffold(
       backgroundColor: bgColor,
@@ -38,7 +40,7 @@ class DiaryDetailScreen extends ConsumerWidget {
           ),
         ),
         iconTheme: IconThemeData(
-          color: isDark ? colorScheme.onSurface : const Color(0xFF8D6E63),
+          color: isDark ? colorScheme.onSurface : AppColors.primary,
         ),
         actions: [
           diaryAsync.maybeWhen(
@@ -48,9 +50,7 @@ class DiaryDetailScreen extends ConsumerWidget {
                       Icons.edit_outlined,
                       color: canEdit
                           ? null
-                          : (isDark
-                                ? colorScheme.onSurface
-                                : const Color(0xFF8D6E63))
+                          : (isDark ? colorScheme.onSurface : AppColors.primary)
                               .withValues(alpha: 0.35),
                     ),
                     tooltip: canEdit ? '수정' : '수정 불가',
@@ -62,16 +62,10 @@ class DiaryDetailScreen extends ConsumerWidget {
                           ),
                         );
                       } else {
-                        ScaffoldMessenger.of(context)
-                          ..clearSnackBars()
-                          ..showSnackBar(
-                            const SnackBar(
-                              content: Text(
-                                '작성 기간(당일~다음날 15시)이 지나 수정할 수 없어요 🥲',
-                              ),
-                              behavior: SnackBarBehavior.floating,
-                            ),
-                          );
+                        showFloatingSnackBar(
+                          context,
+                          '작성 기간(당일~다음날 15시)이 지나 수정할 수 없어요 🥲',
+                        );
                       }
                     },
                   )
@@ -94,7 +88,7 @@ class DiaryDetailScreen extends ConsumerWidget {
               : Colors.white.withValues(alpha: 0.9);
           final borderColor = isDark
               ? Theme.of(context).colorScheme.outline.withValues(alpha: 0.2)
-              : const Color(0xFFD7C4A8);
+              : AppColors.cardBorder;
 
           return SingleChildScrollView(
             padding: const EdgeInsets.all(16),
@@ -112,9 +106,7 @@ class DiaryDetailScreen extends ConsumerWidget {
                         ? null
                         : [
                             BoxShadow(
-                              color: const Color(
-                                0xFF8D6E63,
-                              ).withValues(alpha: 0.08),
+                              color: AppColors.primary.withValues(alpha: 0.08),
                               blurRadius: 12,
                               offset: const Offset(0, 4),
                             ),
@@ -206,7 +198,7 @@ class _ActivitiesDisplay extends StatelessWidget {
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final colorScheme = Theme.of(context).colorScheme;
-    final labelColor = isDark ? colorScheme.primary : const Color(0xFF8D6E63);
+    final labelColor = isDark ? colorScheme.primary : AppColors.primary;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -253,10 +245,10 @@ class _MemoDisplay extends StatelessWidget {
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final colorScheme = Theme.of(context).colorScheme;
-    final labelColor = isDark ? colorScheme.primary : const Color(0xFF8D6E63);
+    final labelColor = isDark ? colorScheme.primary : AppColors.primary;
     final memoBg = isDark
         ? colorScheme.surfaceContainerHighest
-        : const Color(0xFFF5F0E8);
+        : AppColors.background;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [

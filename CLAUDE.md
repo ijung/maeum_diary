@@ -54,7 +54,7 @@ Presentation → Application → Domain ← Infrastructure
 | **Domain** | `lib/domain/` | 비즈니스 규칙. 외부 의존 없음. Entity, Value Object, Repository Interface(Port) |
 | **Application** | `lib/application/` | UseCase 단위 비즈니스 흐름 조율. Domain에만 의존 |
 | **Infrastructure** | `lib/infrastructure/` | SQLite Adapter. DiaryRepository 구현체, DTO/Mapper |
-| **Presentation** | `lib/presentation/` | Riverpod Provider + Flutter Widget. UseCase를 통해서만 데이터 접근 |
+| **Presentation** | `lib/presentation/` | Riverpod Provider + Flutter Widget. UseCase를 통해서만 데이터 접근. `theme/app_colors.dart`(색상 상수), `utils/snackbar_helper.dart`(공통 스낵바) 포함 |
 | **Core** | `lib/core/` | 전 레이어 공유 유틸. `Failure` sealed class, `isEditableDate` 유틸, 공유 상수(`constants/`) |
 | **DI** | `lib/core/di/providers.dart` | Riverpod Provider 정의. 전체 DI 연결 지점 |
 
@@ -123,7 +123,8 @@ test/
 │   └── get_monthly_diary_use_case_test.dart
 └── presentation/provider/
     ├── notification_settings_test.dart
-    └── notification_settings_notifier_test.dart
+    ├── notification_settings_notifier_test.dart
+    └── save_diary_notifier_test.dart           # SaveDiaryNotifier 상태 전환, 캐시 무효화
 ```
 
 `notification_settings_notifier_test.dart`의 일부 테스트는 `FlutterLocalNotificationsPlugin`이 테스트 환경에서 미초기화돼 `[NotificationService] ... 실패` 로그를 출력하지만, 해당 에러는 내부적으로 catch되어 테스트 자체는 pass한다.
