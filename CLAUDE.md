@@ -92,6 +92,25 @@ UI 이벤트
 - `saveDiaryProvider` — 저장 상태 머신 (NotifierProvider). `SaveDiaryIdle → Loading → Success/Error`
 - `diaryByDateProvider` — 특정 날짜 조회 (FutureProvider.family)
 
+메## 화면 구성
+
+| 화면 | 파일 | 설명 |
+|------|------|------|
+| **메인 화면** | `presentation/screen/main_screen.dart` | 월별 캘린더 + 일기 목록. 날짜 탭으로 상세/작성 화면 이동 |
+| **일기 작성/수정 화면** | `presentation/screen/diary_edit_screen.dart` | 감정 선택(필수, 최대 3개) + 오늘 한 일(최대 5개) + 메모 입력. 신규 작성과 기존 일기 수정 모두 담당 |
+| **일기 상세 화면** | `presentation/screen/diary_detail_screen.dart` | 특정 날짜 일기 조회. 수정 버튼으로 작성/수정 화면 이동 (수정 가능 기간 내에만 활성화) |
+| **설정 화면** | `presentation/screen/settings_screen.dart` | 테마(시스템/밝게/어둡게) + 알림(ON/OFF, 시간, 기록 후에도 알림) + 앱 버전 표시 |
+
+### 화면 전환 흐름
+
+```
+메인 화면
+├── 날짜 탭 (일기 있음) → 일기 상세 화면
+│   └── 수정 버튼 → 일기 작성/수정 화면 (pushReplacement)
+├── 날짜 탭 (일기 없음, 작성 가능 기간) → 일기 작성/수정 화면
+└── 설정 아이콘 → 설정 화면
+```
+
 ## 기술 스택
 
 - **상태관리**: flutter_riverpod 3.x (`StateProvider`는 `package:flutter_riverpod/legacy.dart`에서 import)
