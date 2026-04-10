@@ -14,6 +14,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 8. 코드 작성 후 lint 경고가 없을 때까지 `flutter analyze`를 실행한다.
 9. 코드 작성 후 `CLAUDE.md`를 확인하고, 필요한 경우 수정한다.
 10. 언제나 `dart mcp`를 사용한다.
+11. SQLite 스키마 변경, 저장 데이터 포맷 변경, SharedPreferences 키 변경 등 기존 사용자 데이터와의 호환성이 깨질 수 있는 변경은 최대한 배제한다. 대안이 있다면 반드시 호환성을 유지하는 방향을 선택한다.
+12. 호환성이 깨질 수 있는 변경이 불가피한 경우, 작업을 중단하고 변경이 필요한 이유·영향 범위·마이그레이션 방법을 사용자에게 상세히 설명한 후 명시적 허가를 받는다. 허가 없이는 진행하지 않는다.
 
 ## 개발 명령어
 
