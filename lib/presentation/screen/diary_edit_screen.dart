@@ -102,12 +102,8 @@ class _DiaryEditScreenState extends ConsumerState<DiaryEditScreen> {
           else
             IconButton(
               onPressed: canSave ? _onSave : null,
-              icon: Icon(
-                Icons.check_rounded,
-                color: canSave
-                    ? (isDark ? colorScheme.primary : const Color(0xFF8D6E63))
-                    : colorScheme.onSurface.withValues(alpha: 0.3),
-              ),
+              color: isDark ? colorScheme.primary : const Color(0xFF8D6E63),
+              icon: const Icon(Icons.check_rounded),
               tooltip: '기록하기',
             ),
         ],
