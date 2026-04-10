@@ -173,8 +173,8 @@ class _ThemeTile extends ConsumerWidget {
             ),
             segments: const [
               ButtonSegment(value: ThemeMode.system, label: Text('시스템', maxLines: 1)),
-              ButtonSegment(value: ThemeMode.light, label: Text('라이트', maxLines: 1)),
-              ButtonSegment(value: ThemeMode.dark, label: Text('다크', maxLines: 1)),
+              ButtonSegment(value: ThemeMode.light, label: Text('밝게', maxLines: 1)),
+              ButtonSegment(value: ThemeMode.dark, label: Text('어둡게', maxLines: 1)),
             ],
             selected: {themeMode},
             showSelectedIcon: false,
@@ -294,8 +294,8 @@ class _AlwaysNotifyTile extends ConsumerWidget {
         color: Theme.of(context).colorScheme.onSurfaceVariant,
         size: 22,
       ),
-      title: const Text('일기 작성 후에도 알림', style: TextStyle(fontSize: 15)),
-      subtitle: const Text('오늘 일기를 썼어도 알림을 받아요'),
+      title: const Text('기록 후에도 알림', style: TextStyle(fontSize: 15)),
+      subtitle: const Text('일기를 썼어도 알림을 받아요'),
       value: settings?.alwaysNotify ?? false,
       onChanged: (settings?.enabled == true)
           ? (value) => ref

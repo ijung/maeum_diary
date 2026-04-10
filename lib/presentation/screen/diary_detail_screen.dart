@@ -309,7 +309,7 @@ class _TimestampDisplay extends StatelessWidget {
           children: [
             Icon(Icons.access_time_rounded, size: 13, color: color),
             const SizedBox(width: 4),
-            Text('작성: ${_fmt.format(entry.createdAt)}', style: style),
+            Text('기록: ${_fmt.format(entry.createdAt)}', style: style),
           ],
         ),
         if (isModified) ...[

@@ -13,7 +13,7 @@ import 'package:maeum_diary/domain/value_object/emotions_selection.dart';
 import 'package:maeum_diary/presentation/provider/diary_provider.dart';
 import 'package:maeum_diary/presentation/provider/notification_settings_provider.dart';
 
-/// 일기 작성 / 수정 화면
+/// 일기 기록 / 수정 화면
 class DiaryEditScreen extends ConsumerStatefulWidget {
   final DateTime date;
 
@@ -90,24 +90,26 @@ class _DiaryEditScreenState extends ConsumerState<DiaryEditScreen> {
           color: isDark ? colorScheme.onSurface : const Color(0xFF8D6E63),
         ),
         actions: [
-          TextButton(
-            onPressed: canSave ? _onSave : null,
-            child: isLoading
-                ? const SizedBox(
-                    width: 18,
-                    height: 18,
-                    child: CircularProgressIndicator(strokeWidth: 2),
-                  )
-                : Text(
-                    '기록하기',
-                    style: TextStyle(
-                      fontWeight: FontWeight.w700,
-                      color: isDark
-                          ? colorScheme.primary
-                          : const Color(0xFF8D6E63),
-                    ),
-                  ),
-          ),
+          if (isLoading)
+            const Padding(
+              padding: EdgeInsets.symmetric(horizontal: 16),
+              child: SizedBox(
+                width: 18,
+                height: 18,
+                child: CircularProgressIndicator(strokeWidth: 2),
+              ),
+            )
+          else
+            IconButton(
+              onPressed: canSave ? _onSave : null,
+              icon: Icon(
+                Icons.check_rounded,
+                color: canSave
+                    ? (isDark ? colorScheme.primary : const Color(0xFF8D6E63))
+                    : colorScheme.onSurface.withValues(alpha: 0.3),
+              ),
+              tooltip: '기록하기',
+            ),
         ],
       ),
       body: SingleChildScrollView(
