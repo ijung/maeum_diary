@@ -59,7 +59,7 @@ extension ActivityExtension on Activity {
       case Activity.drinking:
         return '음주';
       case Activity.workDinner:
-        return '회식';
+        return '모임';
       case Activity.study:
         return '공부';
       case Activity.exercise:

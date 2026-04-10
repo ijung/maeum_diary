@@ -35,7 +35,7 @@ extension EmotionExtension on Emotion {
       Emotion.sad => '슬픔',
       Emotion.angry => '화남',
       Emotion.anxious => '불안',
-      Emotion.neutral => '보통',
+      Emotion.neutral => '덤덤',
       Emotion.excited => '설렘',
       Emotion.tired => '피곤',
       Emotion.loved => '사랑',

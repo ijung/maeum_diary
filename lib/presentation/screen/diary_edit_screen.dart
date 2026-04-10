@@ -99,7 +99,7 @@ class _DiaryEditScreenState extends ConsumerState<DiaryEditScreen> {
                     child: CircularProgressIndicator(strokeWidth: 2),
                   )
                 : Text(
-                    '저장',
+                    '기록하기',
                     style: TextStyle(
                       fontWeight: FontWeight.w700,
                       color: isDark
@@ -115,7 +115,7 @@ class _DiaryEditScreenState extends ConsumerState<DiaryEditScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const _SectionLabel(label: '오늘의 감정 (최대 3개)'),
+            const _SectionLabel(label: '오늘 어떤 감정을 느꼈나요? (필수, 최대 3개)'),
             const SizedBox(height: 12),
             _EmotionPicker(
               selected: _selectedEmotions,
@@ -123,7 +123,7 @@ class _DiaryEditScreenState extends ConsumerState<DiaryEditScreen> {
               onMaxReached: _onEmotionMaxReached,
             ),
             const SizedBox(height: 32),
-            const _SectionLabel(label: '오늘 한 일 (선택, 최대 5개)'),
+            const _SectionLabel(label: '오늘 무엇을 했나요? (최대 5개)'),
             const SizedBox(height: 12),
             _ActivityPicker(
               selected: _selectedActivities,
@@ -131,7 +131,7 @@ class _DiaryEditScreenState extends ConsumerState<DiaryEditScreen> {
               onMaxReached: _onActivityMaxReached,
             ),
             const SizedBox(height: 32),
-            const _SectionLabel(label: '메모 (선택)'),
+            const _SectionLabel(label: '오늘의 이야기'),
             const SizedBox(height: 12),
             _MemoField(controller: _memoController, maxLength: _maxMemoLength),
             // 에러 메시지 표시
@@ -471,7 +471,7 @@ class _MemoFieldState extends State<_MemoField> {
           maxLines: 8,
           minLines: 4,
           decoration: InputDecoration(
-            hintText: '오늘 하루 어떠셨나요?',
+            hintText: '오늘의 이야기를 남겨보세요',
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(16),
               borderSide: BorderSide(color: borderColor, width: 1.5),

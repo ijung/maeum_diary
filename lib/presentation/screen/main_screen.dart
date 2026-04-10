@@ -450,7 +450,7 @@ class _CalendarGrid extends ConsumerWidget {
       final target = date_utils.toLocalDate(date);
       final base = target.isAfter(today)
           ? '아직 오지 않은 하루예요.'
-          : '작성 기간(당일~다음날 15시)이 지나 작성할 없어요 🥲';
+          : '작성 기간(당일~다음날 15시)이 지나 기록할 없어요 🥲';
       final message = holidayName != null ? '$holidayName\n$base' : base;
 
       messenger.showSnackBar(
